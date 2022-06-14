@@ -12,6 +12,9 @@ import {
   comparePassword,
   generateHash
 } from "../queries";
+import User from "../models/UserModel.js";
+import Driver from "../models/DriverModel.js";
+import moment from "moment";
 
 const registerAdmin = asyncHandler(async (req, res) => {
   const { firstName, lastName, email, password } = req.body;
@@ -214,7 +217,78 @@ const verifyAndREsetPassword = async (req, res) => {
   //   message: "Password Updated",
   // });
 };
+const getCountofallCollection = async (req, res) => {
+  try {
+    const arr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    const arr2 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
+    const year = req.query.year ? req.query.year : [];
+
+    const start_date = moment(year).startOf("year").toDate();
+    const end_date = moment(year).endOf("year").toDate();
+    const query = [
+      {
+        $match: {
+          createdAt: {
+            $gte: start_date,
+            $lte: end_date
+          }
+        }
+      },
+      {
+        $addFields: {
+          date: {
+            $month: "$createdAt"
+          }
+        }
+      },
+      {
+        $group: {
+          _id: "$date",
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $addFields: {
+          month: "$_id"
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          month: 1,
+          count: 1
+        }
+      }
+    ];
+    const [user, drivercount, salesCount1,salesCount2] = await Promise.all([
+      User.count(),
+      Driver.count(),
+      User.aggregate(query),
+      Driver.aggregate(query)
+
+    ]);
+    console.log("salesCount1", salesCount1);
+    salesCount1.forEach((data) => {
+      if (data) arr[data.month - 1] = data.count;
+    });
+    salesCount2.forEach((data) => {
+      if (data) arr2[data.month - 1] = data.count;
+    });
+    await res.status(201).json({
+      user,
+      drivercount,
+      graph_data1: arr,
+      graph_data2: arr2
+
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: err.toString()
+    });
+  }
+};
 export {
   registerAdmin,
   authAdmin,
@@ -222,5 +296,6 @@ export {
   recoverPassword,
   verifyRecoverCode,
   resetPassword,
-  editProfile
+  editProfile,
+  getCountofallCollection
 };

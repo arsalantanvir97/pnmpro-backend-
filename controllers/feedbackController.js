@@ -3,7 +3,7 @@ import moment from "moment";
 import generateEmail from "../services/generate_email.js";
 
 const createFeedback = async (req, res) => {
-  const { firstName, lastName, email, message } = req.body;
+  const { firstName, lastName, email, message,type } = req.body;
   console.log("req.body", req.body);
   try {
     const feedback = new Feedback(req.body);
@@ -12,7 +12,7 @@ const createFeedback = async (req, res) => {
     const feedbackcreated = await feedback.save();
     console.log("feedbackcreated", feedbackcreated);
     if (feedbackcreated) {
-      const html = `<p>A user named ${firstName} ${lastName} having email ${email} have sent you a message.
+      const html = `<p>A ${type} named ${firstName} ${lastName} having email ${email} have sent you a message.
         \n\n ${message}           
         </p>`;
       await generateEmail("Info@pnmpro.com", "PNMPRO- Contact Us", html);

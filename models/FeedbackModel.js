@@ -8,6 +8,7 @@ const FeedbackSchema = mongoose.Schema(
       email: { type: String, },
    
       message: { type: String, },
+      type: { type: String, },
 
       id: { type: String, },
     },
