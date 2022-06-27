@@ -149,11 +149,11 @@ const resetPassword = asyncHandler(async (req, res) => {
 const editProfile = asyncHandler(async (req, res) => {
   const { firstName, lastName } = req.body;
   let user_image =
-  req.files &&
-  req.files.user_image &&
-  req.files.user_image[0] &&
-  req.files.user_image[0].path;
-  console.log('req.files.user_image',req.files.user_image)
+    req.files &&
+    req.files.user_image &&
+    req.files.user_image[0] &&
+    req.files.user_image[0].path;
+  console.log("req.files.user_image", req.files.user_image);
 
   const admin = await Admin.findOne();
   admin.firstName = firstName ? firstName : admin.firstName;
@@ -261,12 +261,11 @@ const getCountofallCollection = async (req, res) => {
         }
       }
     ];
-    const [user, drivercount, salesCount1,salesCount2] = await Promise.all([
+    const [user, drivercount, salesCount1, salesCount2] = await Promise.all([
       User.count(),
       Driver.count(),
       User.aggregate(query),
       Driver.aggregate(query)
-
     ]);
     console.log("salesCount1", salesCount1);
     salesCount1.forEach((data) => {
@@ -280,7 +279,6 @@ const getCountofallCollection = async (req, res) => {
       drivercount,
       graph_data1: arr,
       graph_data2: arr2
-
     });
   } catch (err) {
     console.log(err);

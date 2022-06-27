@@ -15,6 +15,8 @@ import vehicleRoutes from "./routes/vehicleRoutes";
 import feedbackRoutes from "./routes/feedbackRoutes";
 import userRoutes from "./routes/userRoutes";
 import driverRoutes from "./routes/driverRoutes";
+import savedplaceRoutes from "./routes/savedplaceRoutes";
+import walletRoutes from "./routes/walletRoutes";
 
 dotenv.config();
 const local = true;
@@ -62,6 +64,8 @@ app.use("/api/vehicle", vehicleRoutes);
 app.use("/api/feedback", feedbackRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/driver", driverRoutes);
+app.use("/api/savedplaces", savedplaceRoutes);
+app.use("/api/wallet", walletRoutes);
 
 
 const __dirname = path.resolve();
@@ -74,6 +78,10 @@ app.get("/", (req, res) => {
 const httpsServer = https.createServer(credentials, app);
 httpsServer.listen(process.env.PORT, () => {
   console.log(
-    "\u001b[" + 34 + "m" + `Server started on port: ${process.env.PORT}` + "\u001b[0m"
+    "\u001b[" +
+      34 +
+      "m" +
+      `Server started on port: ${process.env.PORT}` +
+      "\u001b[0m"
   );
 });
