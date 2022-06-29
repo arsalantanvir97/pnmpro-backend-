@@ -7,6 +7,7 @@ const addWallet = async (req, res) => {
     await Wallet.findOneAndUpdate(
       { user: req.id },
       {
+        user: req.id,
         cardholdername,
         cardnumber,
         cvvcode,

@@ -4,11 +4,14 @@ import {
     registerDriver,
     driverlogs,
     toggleActiveStatus,
-    getDriverDetails,updateStatus
+    getDriverDetails,updateStatus,
+    login
 } from "../controllers/driverController";
 import { protect } from "../middlewares/authMIddleware.js";
 
 router.post("/registerDriver", registerDriver);
+router.post("/login", login);
+
 router.get("/driverlogs",protect,driverlogs);
 router.get("/toggle-active/:id",protect,toggleActiveStatus);
 router.get("/driver-details/:id",protect,getDriverDetails);

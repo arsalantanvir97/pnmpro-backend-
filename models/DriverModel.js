@@ -23,6 +23,7 @@ const DriverSchema = mongoose.Schema(
       required: true
     },
     userImage: { type: String },
+    license: { type: String },
     rejectreason: { type: String },
     adminApproval: { type: String, default: "Pending" },
     status: { type: Boolean }

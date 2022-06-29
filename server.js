@@ -17,6 +17,9 @@ import userRoutes from "./routes/userRoutes";
 import driverRoutes from "./routes/driverRoutes";
 import savedplaceRoutes from "./routes/savedplaceRoutes";
 import walletRoutes from "./routes/walletRoutes";
+import cardRoutes from "./routes/cardRoutes";
+import bookRideRoutes from "./routes/bookRideRoutes";
+import promoCodeRoutes from "./routes/promoCodeRoutes";
 
 dotenv.config();
 const local = true;
@@ -55,6 +58,10 @@ app.use(
     {
       name: "ad_video",
       maxCount: 1
+    },
+    {
+      name: "doc_schedule",
+      maxCount: 1
     }
   ])
 );
@@ -66,7 +73,9 @@ app.use("/api/user", userRoutes);
 app.use("/api/driver", driverRoutes);
 app.use("/api/savedplaces", savedplaceRoutes);
 app.use("/api/wallet", walletRoutes);
-
+app.use("/api/card", cardRoutes);
+app.use("/api/bookride", bookRideRoutes);
+app.use("/api/promocode", promoCodeRoutes);
 
 const __dirname = path.resolve();
 app.use("/uploads", express.static(__dirname + "/uploads"));

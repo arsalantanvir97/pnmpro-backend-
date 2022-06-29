@@ -17,13 +17,17 @@ const PromoCodeSchema = mongoose.Schema(
       type: Date
     },
     promocode: {
-      type: Number
+      type: String
     },
     discount: {
       type: Number
     },
     noofusers: {
       type: Number
+    },
+    usersavailed: {
+      type: Number,
+      default: 0
     }
   },
   {

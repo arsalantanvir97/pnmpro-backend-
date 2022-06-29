@@ -8,14 +8,18 @@ export const fileStorage = multer.diskStorage({
   filename: function (req, file, cb) {
     let extension = file.originalname.split(".").pop();
     cb(null, uuidv4() + "." + extension);
-  },
+  }
 });
 
 export const fileFilter = (req, file, cb) => {
   console.log("file", file);
-  if (file.fieldname === "user_image" || "ad_video") {
+  if (file.fieldname === "user_image" || "ad_video" || "doc_schedule") {
     console.log("block1");
-    if (file.mimetype.includes("image/") || file.mimetype.includes("video/")) {
+    if (
+      file.mimetype.includes("image/") ||
+      file.mimetype.includes("video/") ||
+      file.mimetype.includes("application/pdf")
+    ) {
       console.log("block2");
 
       cb(null, true);

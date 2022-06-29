@@ -12,10 +12,18 @@ import {
   comparePassword,
   generateHash
 } from "../queries";
+import session from "../models/SessionModel";
 
 const registerDriver = asyncHandler(async (req, res) => {
-  const { firstName, lastName, email, password, phone } = req.body;
+  const { firstName, lastName, email, password, confirmpassword, phone } =
+    req.body;
+  let userlicense =
+    req.files && req.files.doc_schedule
+      ? req.files.doc_schedule[0].path
+      : req.files.user_image[0].path;
 
+  if (!comparePassword(password, confirmpassword))
+    return res.status(400).json({ message: "Password Not Equal" });
   const DriverExists = await Driver.findOne({ email });
 
   if (DriverExists) {
@@ -28,21 +36,65 @@ const registerDriver = asyncHandler(async (req, res) => {
     lastName,
     email,
     password,
-    phone
+    phone,
+    license: userlicense
   });
 
   if (driver) {
     res.status(201).json({
       _id: driver._id,
+      phone: driver.phone,
       firstName: driver.firstName,
       lastName: driver.lastName,
       email: driver.email,
-
+      license: driver.license,
       token: generateToken(driver._id)
     });
   } else {
     res.status(400);
     throw new Error("Invalid driver data");
+  }
+});
+const login = asyncHandler(async (req, res) => {
+  console.log("authAdmin");
+  const { email, password, deviceId, device_type } = req.body;
+
+  const driver = await Driver.findOne({ email });
+
+  if (driver && (await driver.matchPassword(password))) {
+    if (
+      driver.adminApproval == "Rejected" ||
+      driver.adminApproval == "Pending"
+    ) {
+      console.log("hiii");
+      res.status(201).json({
+        message: "You haven't been approved by admin"
+      });
+    } else {
+      console.log("hiii2");
+
+      const createdataofdriver = await session.findOneAndUpdate(
+        { user: driver._id },
+        { deviceId: deviceId, deviceType: device_type },
+        { new: true, upsert: true, returnNewDocument: true }
+      );
+      console.log("createdataofdriver", createdataofdriver);
+      const abc = await createdataofdriver.save();
+      res.json({
+        _id: driver._id,
+        firstName: driver.firstName,
+        lastName: driver.lastName,
+        email: driver.email,
+        phone: driver.phone,
+        userImage: driver.userImage,
+        token: generateToken(driver._id)
+      });
+    }
+  } else {
+    console.log("error");
+    res.status(201).json({
+      message: "Invalid Email or Password"
+    });
   }
 });
 const driverlogs = async (req, res) => {
@@ -139,7 +191,7 @@ const getDriverDetails = async (req, res) => {
 };
 const updateStatus = async (req, res) => {
   const { status, rejectreason } = req.body;
-  console.log('req',req.body)
+  console.log("req", req.body);
   try {
     const driver = await Driver.findById(req.params.id);
     console.log("driver", driver);
@@ -161,10 +213,12 @@ const updateStatus = async (req, res) => {
     });
   }
 };
+
 export {
   registerDriver,
   driverlogs,
   toggleActiveStatus,
   getDriverDetails,
-  updateStatus
+  updateStatus,
+  login
 };

@@ -3,7 +3,7 @@ const sessionSchema = mongoose.Schema({
   token: {
     type: String
   },
-  user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: "User"||"Driver" },
   status: {
     type: Boolean,
     default: false
