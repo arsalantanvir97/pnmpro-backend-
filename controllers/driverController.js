@@ -97,6 +97,74 @@ const login = asyncHandler(async (req, res) => {
     });
   }
 });
+
+const resetPassword = async (req, res) => {
+  try {
+    console.log("reset");
+
+    const { password, confirm_password, code, email } = req.body;
+    console.log("req.body", req.body);
+    if (!comparePassword(password, confirm_password))
+      return res.status(400).json({ message: "Password does not match" });
+    const reset = await Reset.findOne({ email, code });
+    console.log("reset", reset);
+    if (!reset)
+      return res.status(400).json({ message: "Invalid Recovery status" });
+    else {
+      console.log("resetexist");
+      const updateddriver = await Driver.findOne({ email });
+      updateddriver.password = password;
+      await updateddriver.save();
+      console.log("updateddriver", updateddriver);
+      res.status(201).json({
+       message:'Password Reset Successfully'
+      });
+    }
+  } catch (error) {
+    console.log("error", error);
+    return res.status(400).json({ message: error.toString() });
+  }
+};
+
+const changepassword = async (req, res) => {
+  try {
+    console.log("reset");
+
+    const { existingpassword, newpassword, confirm_password } = req.body;
+
+    console.log("req.body", req.body);
+    const driver = await Driver.findOne({ _id: req.id });
+
+    if (driver && (await driver.matchPassword(existingpassword))) {
+      console.log("block1");
+      if (!comparePassword(newpassword, confirm_password)) {
+        console.log("block2");
+        return res.status(400).json({ message: "Password does not match" });
+      } else {
+        console.log("block3");
+        driver.password = newpassword;
+        await driver.save();
+        console.log("driver", driver);
+        res.status(201).json({
+        message:'Password Updated Successfully'
+        });
+      }
+    } else {
+      console.log("block4");
+
+      return res.status(401).json({ message: "Wrong Password" });
+    }
+  } catch (error) {
+    console.log("error", error);
+    return res.status(400).json({ message: error.toString() });
+  }
+
+  // return updatedadmin
+  // await res.status(201).json({
+  //   message: "Password Updated",
+  // });
+};
+
 const driverlogs = async (req, res) => {
   try {
     console.log(
@@ -214,11 +282,79 @@ const updateStatus = async (req, res) => {
   }
 };
 
+const recoverPassword = asyncHandler(async (req, res) => {
+  console.log("recoverPassword");
+  const { email } = req.body;
+  console.log("req.body", req.body);
+  const driver = await Driver.findOne({ email });
+  if (!driver) {
+    console.log("!driver");
+    return res.status(401).json({
+      message: "Invalid Email or Password"
+    });
+  } else {
+    const status = generateCode();
+    await createResetToken(email, status);
+
+    const html = `<p>You are receiving this because you (or someone else) have requested the reset of the password for your account.
+        \n\n Your verification status is ${status}:\n\n
+        \n\n If you did not request this, please ignore this email and your password will remain unchanged.           
+        </p>`;
+    await generateEmail(email, "PNMPRO - Password Reset", html);
+    return res.status(201).json({
+      message:
+        "Recovery status Has Been Emailed To Your Registered Email Address"
+    });
+  }
+});
+
+const verifyRecoverCode = async (req, res) => {
+  const { code, email } = req.body;
+  console.log("req.body", req.body);
+  const reset = await Reset.findOne({ email, code });
+
+  if (reset)
+    return res.status(200).json({ message: "Recovery status Accepted" });
+  else {
+    return res.status(400).json({ message: "Invalid Code" });
+  }
+  // console.log("reset", reset);
+};
+
+const editProfile = asyncHandler(async (req, res) => {
+  const { firstName, lastName, phone } = req.body;
+  let user_image =
+    req.files &&
+    req.files.user_image &&
+    req.files.user_image[0] &&
+    req.files.user_image[0].path;
+
+  const driver = await Driver.findOne({ _id: req.id });
+  driver.firstName = firstName ? firstName : driver.firstName;
+  driver.lastName = lastName ? lastName : driver.lastName;
+  driver.phone = phone ? phone : driver.phone;
+
+  driver.userImage = user_image ? user_image : driver.userImage;
+  await driver.save();
+  // await res.status(201).json({
+  //   message: "Admin Update",
+  //   admin,
+  // });
+  await res.status(201).json({
+    driver
+  });
+});
+
 export {
   registerDriver,
   driverlogs,
   toggleActiveStatus,
   getDriverDetails,
   updateStatus,
-  login
+  login,
+  resetPassword,
+  changepassword,
+  recoverPassword,
+  verifyRecoverCode,
+  editProfile
 };

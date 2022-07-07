@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const DriverVehicleTypeSchema = mongoose.Schema(
   {
     vehicletype: { type: mongoose.Schema.Types.ObjectId, ref: "VehicleType" },
-
+    driver: { type: mongoose.Schema.Types.ObjectId, ref: "Driver" },
     brandname: {
       type: String,
       required: true
@@ -20,7 +20,11 @@ const DriverVehicleTypeSchema = mongoose.Schema(
       type: String,
       required: true
     },
-    VinNi: {
+    licensePlate: {
+      type: String,
+      required: true
+    },
+    VinNo: {
       type: Number,
       required: true
     },

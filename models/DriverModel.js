@@ -13,6 +13,10 @@ const DriverSchema = mongoose.Schema(
     phone: {
       type: String
     },
+    location: {
+      type: { type: String, default: "Point" },
+      coordinates: { type: [Number] }
+    },
     email: {
       type: String,
       required: true,
@@ -48,6 +52,8 @@ DriverSchema.pre("save", async function (next) {
 
 DriverSchema.plugin(mongoosePaginate);
 DriverSchema.index({ "$**": "text" });
+
+DriverSchema.index({ location: "2dsphere" });
 
 const Driver = mongoose.model("Driver", DriverSchema);
 

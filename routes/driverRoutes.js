@@ -5,12 +5,23 @@ import {
     driverlogs,
     toggleActiveStatus,
     getDriverDetails,updateStatus,
-    login
+    login,recoverPassword,
+    verifyRecoverCode,
+    resetPassword,
+    changepassword,
+    editProfile,
 } from "../controllers/driverController";
 import { protect } from "../middlewares/authMIddleware.js";
 
 router.post("/registerDriver", registerDriver);
 router.post("/login", login);
+router.post("/driverRecoverPassword", recoverPassword);
+router.post("/driververifyRecoverCode", verifyRecoverCode);
+router.post("/driverresetPassword", resetPassword);
+router.post("/changepassword", protect, changepassword);
+router.post("/editProfile", protect, editProfile);
+router.post("/changepassword", protect, changepassword);
+
 
 router.get("/driverlogs",protect,driverlogs);
 router.get("/toggle-active/:id",protect,toggleActiveStatus);

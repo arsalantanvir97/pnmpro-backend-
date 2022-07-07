@@ -13,7 +13,13 @@ export const fileStorage = multer.diskStorage({
 
 export const fileFilter = (req, file, cb) => {
   console.log("file", file);
-  if (file.fieldname === "user_image" || "ad_video" || "doc_schedule") {
+  if (
+    file.fieldname === "user_image" ||
+    "receipt" ||
+    "license_plate" ||
+    "ad_video" ||
+    "doc_schedule"
+  ) {
     console.log("block1");
     if (
       file.mimetype.includes("image/") ||

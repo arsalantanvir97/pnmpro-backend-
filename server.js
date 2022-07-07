@@ -18,8 +18,10 @@ import driverRoutes from "./routes/driverRoutes";
 import savedplaceRoutes from "./routes/savedplaceRoutes";
 import walletRoutes from "./routes/walletRoutes";
 import cardRoutes from "./routes/cardRoutes";
-import bookRideRoutes from "./routes/bookRideRoutes";
+import RideRoutes from "./routes/RideRoutes";
 import promoCodeRoutes from "./routes/promoCodeRoutes";
+import driverVehicleRoutes from "./routes/driverVehicleRoutes";
+import Driver from "./models/DriverModel.js";
 
 dotenv.config();
 const local = true;
@@ -56,6 +58,14 @@ app.use(
       maxCount: 1
     },
     {
+      name: "receipt",
+      maxCount: 1
+    },
+    {
+      name: "license_plate",
+      maxCount: 1
+    },
+    {
       name: "ad_video",
       maxCount: 1
     },
@@ -74,8 +84,9 @@ app.use("/api/driver", driverRoutes);
 app.use("/api/savedplaces", savedplaceRoutes);
 app.use("/api/wallet", walletRoutes);
 app.use("/api/card", cardRoutes);
-app.use("/api/bookride", bookRideRoutes);
+app.use("/api/ride", RideRoutes);
 app.use("/api/promocode", promoCodeRoutes);
+app.use("/api/driverVehicle", driverVehicleRoutes);
 
 const __dirname = path.resolve();
 app.use("/uploads", express.static(__dirname + "/uploads"));
@@ -93,4 +104,53 @@ httpsServer.listen(process.env.PORT, () => {
       `Server started on port: ${process.env.PORT}` +
       "\u001b[0m"
   );
+});
+const io = require("./utills/socket").init(httpsServer);
+
+// Add a binding to handle '/tests'
+// app.get('/getdrivers',async function(req, res){
+//   try {
+//     const sockets = (await io.in('123').fetchSockets()).map(socket => console.log('socketttttttttttt',socket));
+//     console.log(sockets);
+
+//       // render the /tests view
+//     res.status(201).send({
+//       message:sockets
+
+//     })
+//   } catch (error) {
+
+//   }
+
+// })
+
+io.on("connection", (socket) => {
+  console.log("client joined");
+  // console.log(socket)
+  socket.on("joinRoom", (userId) => {
+    console.log("Room Joined. ROOM ID: ", userId);
+
+    socket.join(userId);
+  });
+
+  socket.on("drivercoordinates", async (coordinates) => {
+    console.log("abccccccc", coordinates);
+    await Driver.findOneAndUpdate(
+      { _id: coordinates.driverid },
+      { location: { type: "Point", coordinates: coordinates.coordinates } },
+      { new: true, upsert: true, returnNewDocument: true }
+    );
+    io.in(coordinates.userId).emit("drivercoordinates", coordinates);
+  });
+
+  //Listen for Chat Message
+  socket.on("coordinates", (coordinates) => {
+    console.log(coordinates);
+    io.in(coordinates.userId).emit("coordinates", coordinates.coordinates);
+  });
+
+  // When User Disconnects
+  socket.on("disconnect", () => {
+    console.log("User Disconnected");
+  });
 });
