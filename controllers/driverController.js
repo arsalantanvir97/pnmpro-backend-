@@ -15,7 +15,7 @@ import {
 import session from "../models/SessionModel";
 
 const registerDriver = asyncHandler(async (req, res) => {
-  const { firstName, lastName, email, password, confirmpassword, phone } =
+  const { firstName, lastName, email, password, confirmpassword, phone ,location} =
     req.body;
   let userlicense =
     req.files && req.files.doc_schedule
@@ -27,16 +27,18 @@ const registerDriver = asyncHandler(async (req, res) => {
   const DriverExists = await Driver.findOne({ email });
 
   if (DriverExists) {
+  
     res.status(400);
     throw new Error("Driver already exists");
   }
-
   const driver = await Driver.create({
     firstName,
     lastName,
     email,
     password,
     phone,
+    location: { type: 'Point', coordinates: location },
+
     license: userlicense
   });
 
@@ -48,11 +50,14 @@ const registerDriver = asyncHandler(async (req, res) => {
       lastName: driver.lastName,
       email: driver.email,
       license: driver.license,
+      location:driver.location,
       token: generateToken(driver._id)
     });
   } else {
-    res.status(400);
-    throw new Error("Invalid driver data");
+
+    res.status(400).json({
+      message: "Invalid Data"
+    });
   }
 });
 const login = asyncHandler(async (req, res) => {
@@ -86,13 +91,15 @@ const login = asyncHandler(async (req, res) => {
         lastName: driver.lastName,
         email: driver.email,
         phone: driver.phone,
+        location:driver.location,
+
         userImage: driver.userImage,
         token: generateToken(driver._id)
       });
     }
   } else {
     console.log("error");
-    res.status(201).json({
+    res.status(400).json({
       message: "Invalid Email or Password"
     });
   }

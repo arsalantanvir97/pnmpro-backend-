@@ -9,8 +9,7 @@ const SavedPlacesSchema = mongoose.Schema(
     location: {
       type: { type: String, default: "Point" },
       coordinates: { type: [Number] }
-    },
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User" }
+    },    user: { type: mongoose.Schema.Types.ObjectId, ref: "User" }
   },
   {
     timestamps: true
