@@ -15,7 +15,7 @@ import {
 import session from "../models/SessionModel";
 
 const registerDriver = asyncHandler(async (req, res) => {
-  const { firstName, lastName, email, password, confirmpassword, phone ,location} =
+  const { firstName, lastName, email, password, confirmpassword, phone } =
     req.body;
   let userlicense =
     req.files && req.files.doc_schedule
@@ -37,7 +37,7 @@ const registerDriver = asyncHandler(async (req, res) => {
     email,
     password,
     phone,
-    location: { type: 'Point', coordinates: location },
+    location: { type: 'Point', coordinates: [0,0] },
 
     license: userlicense
   });
@@ -50,7 +50,6 @@ const registerDriver = asyncHandler(async (req, res) => {
       lastName: driver.lastName,
       email: driver.email,
       license: driver.license,
-      location:driver.location,
       token: generateToken(driver._id)
     });
   } else {
