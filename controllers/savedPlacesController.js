@@ -34,5 +34,19 @@ const userSavedPlaces = async (req, res) => {
       });
     }
   };
+  const deleteplace = async (req, res) => {
   
-export { addSavedPlaces,userSavedPlaces };
+    try {
+      await SavedPlaces.findByIdAndDelete(req.params.id);
+      await res.status(201).json({
+        message: "Place Deleted Successfully"
+      });
+    } catch (err) {
+      res.status(500).json({
+        message: err.toString()
+      });
+    }
+  };
+  
+  
+export { addSavedPlaces,userSavedPlaces,deleteplace };

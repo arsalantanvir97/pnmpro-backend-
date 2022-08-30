@@ -11,7 +11,8 @@ import {
   verifyRecoverCode,
   resetPassword,
   changepassword,
-  editProfile
+  editProfile,
+  userNotifications
 } from "../controllers/userController";
 import { protect } from "../middlewares/authMIddleware.js";
 
@@ -28,5 +29,6 @@ router.get("/userlogs", protect, userlogs);
 router.get("/toggle-active/:id", toggleActiveStatus);
 router.get("/user-details/:id", protect, getUserDetails);
 router.get("/userDetails", protect, UserDetails);
+router.get("/userNotifications", protect, userNotifications);
 
 export default router;

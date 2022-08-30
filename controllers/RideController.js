@@ -6,6 +6,8 @@ import SendPushNotification from "../services/SendPushNotification";
 import Review from "../models/ReviewModel";
 import SoundTrack from "../models/SoundTrackModel";
 import Wallet from "../models/WalletModel";
+import Payment from "../models/PaymentModel";
+import CreateNotification from "../utills/notification";
 
 const bookaRide = async (req, res) => {
   const {
@@ -13,7 +15,8 @@ const bookaRide = async (req, res) => {
     vehicletypeid,
     pickuplocation,
     dropofflocation,
-    promocode
+    promocode,
+    walletpriority
   } = req.body;
   let discountedfare = 0;
   let totalbill = 0;
@@ -25,20 +28,35 @@ const bookaRide = async (req, res) => {
       const promoCode = await PromoCode.findById(promocode);
       discountedfare = promoCode.discount;
       totalbill = totalbill / promoCode.discount;
+    } else if (walletpriority) {
+      const wallet = await Wallet.findOne({ user: req.id });
+      if (wallet.amount >= totalbill) {
+        wallet.amount = wallet.amount - totalbill;
+        await wallet.save();
+      } else {
+        return await res.status(203).json({
+          message: "No enough amount in wallet to book this ride"
+        });
+      }
     }
-
     const createBookRide = await BookRide.create({
-      paymentMethod,
+      paymentMethod: walletpriority ? "Wallet" : paymentMethod,
       vehicletype,
       pickuplocation: { type: "Point", coordinates: pickuplocation },
       dropofflocation: { type: "Point", coordinates: dropofflocation },
+      isPaid: true,
       estimatedfare: vehicletype.rate,
       totalbill,
       discountedfare,
       user: req.id
     });
-
     await createBookRide.save();
+    const payment = await Payment.create({
+      date: new Date(),
+      ride: createBookRide._id,
+      user: req.id
+    });
+    await payment.save();
     let driverid = [];
     const driver = await Driver.find({
       location: {
@@ -60,9 +78,32 @@ const bookaRide = async (req, res) => {
       },
       userId: driverid
     });
+    const notification = {
+      notifiableId: null,
+      notificationType: "Incoming Ride",
+      title: "Incoming Ride",
+      body: `A user having id of ${req.id} havr just created an order of id ${createBookRide._id}`,
+      payload: {
+        type: "Ride",
+        id: driverid
+      }
+    };
+    CreateNotification(notification);
+    const ride = await BookRide.findById(createBookRide._id)
+      .populate({
+        path: "user vehicletype driver",
+        populate: {
+          path: "drivervehicletype",
+          populate: {
+            path: "vehicletype"
+          }
+        }
+      })
+      .select("-password")
+      .lean();
 
     await res.status(201).json({
-      createBookRide
+      createBookRide: ride
     });
   } catch (err) {
     res.status(500).json({
@@ -74,9 +115,18 @@ const bookaRide = async (req, res) => {
 const rideDetails = async (req, res) => {
   try {
     const ride = await BookRide.findById(req.params.id)
-      .populate("user vehicletype driver")
+      .populate({
+        path: "user vehicletype driver",
+        populate: {
+          path: "drivervehicletype",
+          populate: {
+            path: "vehicletype"
+          }
+        }
+      })
       .select("-password")
       .lean();
+
     res.status(201).json({
       ride
     });
@@ -91,8 +141,12 @@ const acceptRide = async (req, res) => {
   try {
     const ride = await BookRide.findById(req.params.id);
     ride.driver = req.id;
-
     await ride.save();
+    await Payment.findOneAndUpdate(
+      { ride: req.params.id },
+      { driver: req.id },
+      { new: true, upsert: true }
+    );
     await SendPushNotification({
       title: "Ride Accepted",
       body: `A driver having id ${req.id} have accepted your ride`,
@@ -102,6 +156,17 @@ const acceptRide = async (req, res) => {
       },
       userId: ride.user
     });
+     const notification = {
+      notifiableId: null,
+      notificationType: "Ride Accepted",
+      title: "Ride Accepted",
+      body: `A driver having id ${req.id} have accepted your ride`,
+      payload: {
+        type: "Ride",
+        id: ride.user
+      }
+    };
+    CreateNotification(notification);
     res.status(201).json({
       message: "Ride Accepted"
     });
@@ -144,10 +209,16 @@ const reportRide = async (req, res) => {
 
 const userRides = async (req, res) => {
   try {
-    const ride = await BookRide.find({ user: req.id })
-      .populate("user vehicletype driver")
-      .select("-password")
-      .lean();
+    const ride = await BookRide.find({ user: req.id }).populate({
+      path: "user vehicletype driver",
+      populate: {
+        path: "drivervehicletype",
+        populate: {
+          path: "vehicletype"
+        }
+      }
+    });
+
     res.status(201).json({
       ride
     });
@@ -160,10 +231,15 @@ const userRides = async (req, res) => {
 
 const driverRides = async (req, res) => {
   try {
-    const ride = await BookRide.find({ driver: req.id })
-      .populate("user vehicletype driver")
-      .select("-password")
-      .lean();
+    const ride = await BookRide.find({ driver: req.id }).populate({
+      path: "user vehicletype driver",
+      populate: {
+        path: "drivervehicletype",
+        populate: {
+          path: "vehicletype"
+        }
+      }
+    });
     res.status(201).json({
       ride
     });
@@ -315,6 +391,7 @@ const requestTrack = async (req, res) => {
       },
       userId: ride.driver
     });
+    
     res.status(201).json({
       message: "Request Track"
     });
@@ -327,16 +404,10 @@ const requestTrack = async (req, res) => {
 
 const addnewsong = async (req, res) => {
   const { songname, artistname, duration, ride } = req.body;
-  let receipt =
-    req.files &&
-    req.files.receipt &&
-    req.files.receipt[0] &&
-    req.files.receipt[0].path;
   console.log("req.bpdy", req.body);
   try {
     const ridee = await BookRide.findById(ride);
     const sound = await SoundTrack.create({
-      image: receipt,
       songname,
       artistname,
       duration,
@@ -461,9 +532,26 @@ const getDriverRating = async (req, res) => {
     });
   }
 };
+const getRatingData = async (req, res) => {
+  try {
+    const rating = await Review.findOne({ ride: req.params.id })
+      .populate("user ride driver")
+      .select("-password")
+      .lean();
+    await res.status(201).json({
+      rating
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.toString()
+    });
+  }
+};
+
 export {
   markRidePaid,
   submitAmount,
+  getRatingData,
   addToWallet,
   getDriverRating,
   bookaRide,

@@ -4,7 +4,7 @@ import mongoosePaginate from "mongoose-paginate-v2";
 
 const SoundTrackSchema = mongoose.Schema(
   {
-    image: { type: String, required: true },
+    image: { type: String,  },
     songname: { type: String, required: true },
     artistname: { type: String, required: true },
     duration: { type: String, required: true },

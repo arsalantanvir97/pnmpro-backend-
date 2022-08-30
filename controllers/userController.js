@@ -55,7 +55,7 @@ const login = asyncHandler(async (req, res) => {
   console.log("authAdmin");
   const { email, password, deviceId, device_type } = req.body;
 
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email: email.toLowerCase() });
 
   if (user && (await user.matchPassword(password))) {
     const createdataofusers = await Session.findOneAndUpdate(
@@ -86,7 +86,7 @@ const recoverPassword = asyncHandler(async (req, res) => {
   console.log("recoverPassword");
   const { email } = req.body;
   console.log("req.body", req.body);
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email: email.toLowerCase() });
   if (!user) {
     console.log("!user");
     return res.status(401).json({
@@ -111,7 +111,7 @@ const recoverPassword = asyncHandler(async (req, res) => {
 const verifyRecoverCode = async (req, res) => {
   const { code, email } = req.body;
   console.log("req.body", req.body);
-  const reset = await Reset.findOne({ email, code });
+  const reset = await Reset.findOne({ email: email.toLowerCase() ,code});
 
   if (reset)
     return res.status(200).json({ message: "Recovery status Accepted" });
@@ -212,7 +212,7 @@ const resetPassword = async (req, res) => {
     console.log("req.body", req.body);
     if (!comparePassword(password, confirm_password))
       return res.status(400).json({ message: "Password does not match" });
-    const reset = await Reset.findOne({ email, code });
+    const reset = await Reset.findOne({ email: email.toLowerCase() ,code});
     console.log("reset", reset);
     if (!reset)
       return res.status(400).json({ message: "Invalid Recovery status" });
@@ -321,11 +321,24 @@ const UserDetails = async (req, res) => {
     });
   }
 };
+const userNotifications = async (req, res) => {
+  try {
+    const notification = await Notification.find({'payload.id':req.id});
+    await res.status(201).json({
+      notification
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: err.toString()
+    });
+  }
+};
 
 export {
   registerUser,
   changepassword,
   editProfile,
+  userNotifications,
   userlogs,
   toggleActiveStatus,
   getUserDetails,

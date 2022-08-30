@@ -13,6 +13,7 @@ import {
   generateHash
 } from "../queries";
 import session from "../models/SessionModel";
+import Payment from "../models/PaymentModel";
 
 const registerDriver = asyncHandler(async (req, res) => {
   const { firstName, lastName, email, password, confirmpassword, phone } =
@@ -27,7 +28,6 @@ const registerDriver = asyncHandler(async (req, res) => {
   const DriverExists = await Driver.findOne({ email });
 
   if (DriverExists) {
-  
     res.status(400);
     throw new Error("Driver already exists");
   }
@@ -37,7 +37,7 @@ const registerDriver = asyncHandler(async (req, res) => {
     email,
     password,
     phone,
-    location: { type: 'Point', coordinates: [0,0] },
+    location: { type: "Point", coordinates: [0, 0] },
 
     license: userlicense
   });
@@ -53,7 +53,6 @@ const registerDriver = asyncHandler(async (req, res) => {
       token: generateToken(driver._id)
     });
   } else {
-
     res.status(400).json({
       message: "Invalid Data"
     });
@@ -63,7 +62,7 @@ const login = asyncHandler(async (req, res) => {
   console.log("authAdmin");
   const { email, password, deviceId, device_type } = req.body;
 
-  const driver = await Driver.findOne({ email });
+  const driver = await Driver.findOne({ email: email.toLowerCase() });
 
   if (driver && (await driver.matchPassword(password))) {
     if (
@@ -90,7 +89,7 @@ const login = asyncHandler(async (req, res) => {
         lastName: driver.lastName,
         email: driver.email,
         phone: driver.phone,
-        location:driver.location,
+        location: driver.location,
 
         userImage: driver.userImage,
         token: generateToken(driver._id)
@@ -112,18 +111,18 @@ const resetPassword = async (req, res) => {
     console.log("req.body", req.body);
     if (!comparePassword(password, confirm_password))
       return res.status(400).json({ message: "Password does not match" });
-    const reset = await Reset.findOne({ email, code });
+    const reset = await Reset.findOne({ email: email.toLowerCase(),code });
     console.log("reset", reset);
     if (!reset)
       return res.status(400).json({ message: "Invalid Recovery status" });
     else {
       console.log("resetexist");
-      const updateddriver = await Driver.findOne({ email });
+      const updateddriver = await Driver.findOne({ email: email.toLowerCase() });
       updateddriver.password = password;
       await updateddriver.save();
       console.log("updateddriver", updateddriver);
       res.status(201).json({
-       message:'Password Reset Successfully'
+        message: "Password Reset Successfully"
       });
     }
   } catch (error) {
@@ -152,7 +151,7 @@ const changepassword = async (req, res) => {
         await driver.save();
         console.log("driver", driver);
         res.status(201).json({
-        message:'Password Updated Successfully'
+          message: "Password Updated Successfully"
         });
       }
     } else {
@@ -292,7 +291,7 @@ const recoverPassword = asyncHandler(async (req, res) => {
   console.log("recoverPassword");
   const { email } = req.body;
   console.log("req.body", req.body);
-  const driver = await Driver.findOne({ email });
+  const driver = await Driver.findOne({ email: email.toLowerCase() });
   if (!driver) {
     console.log("!driver");
     return res.status(401).json({
@@ -317,7 +316,7 @@ const recoverPassword = asyncHandler(async (req, res) => {
 const verifyRecoverCode = async (req, res) => {
   const { code, email } = req.body;
   console.log("req.body", req.body);
-  const reset = await Reset.findOne({ email, code });
+  const reset = await Reset.findOne({ email: email.toLowerCase() ,code});
 
   if (reset)
     return res.status(200).json({ message: "Recovery status Accepted" });
@@ -350,11 +349,38 @@ const editProfile = asyncHandler(async (req, res) => {
     driver
   });
 });
-
+const getEarning=async(req,res)=>{
+  try {
+    const payment=await Payment.find({driver:req.id}).populate('user driver ride').lean()
+    await res.status(201).json({
+      payment
+    });
+  } catch (error) {
+    console.log("error", error);
+    res.status(500).json({
+      message: error.toString()
+    });
+  }
+}
+const getEarningDetails=async(req,res)=>{
+  try {
+    const payment=await Payment.findById(req.params.id).populate('user driver ride').lean()
+    await res.status(201).json({
+      payment
+    });
+  } catch (error) {
+    console.log("error", error);
+    res.status(500).json({
+      message: error.toString()
+    });
+  }
+}
 export {
   registerDriver,
+  getEarningDetails,
   driverlogs,
   toggleActiveStatus,
+  getEarning,
   getDriverDetails,
   updateStatus,
   login,

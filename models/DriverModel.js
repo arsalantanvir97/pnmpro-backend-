@@ -13,6 +13,10 @@ const DriverSchema = mongoose.Schema(
     phone: {
       type: String
     },
+    drivervehicletype: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "DriverVehicleType"
+    },
     location: {
       type: { type: String, default: "Point" },
       coordinates: { type: [Number] }

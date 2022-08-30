@@ -21,7 +21,8 @@ import {
   endRide,
   submitAmount,
   addToWallet,
-  getDriverRating
+  getDriverRating,
+  getRatingData
 } from "../controllers/RideController";
 import { protect } from "../middlewares/authMIddleware.js";
 
@@ -47,6 +48,7 @@ router.get("/endRide/:id", protect, endRide);
 router.post("/submitAmount/:id", protect, submitAmount);
 router.get("/addToWallet/:id", protect, addToWallet);
 router.get("/getDriverRating", protect, getDriverRating);
+router.get("/getRatingData/:id", protect, getRatingData);
 
 
 export default router;

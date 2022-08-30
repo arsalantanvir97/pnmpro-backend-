@@ -12,7 +12,7 @@ const WalletSchema = mongoose.Schema(
       type: Number
     },
     expiryDate: {
-      type: Date
+      type: String
     },
     amount: {
       type: Number

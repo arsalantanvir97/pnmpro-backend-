@@ -1,3 +1,4 @@
+import Driver from "../models/DriverModel";
 import DriverVehicle from "../models/DriverVehicleModel";
 
 const createDriverVehicle = async (req, res) => {
@@ -32,6 +33,9 @@ const createDriverVehicle = async (req, res) => {
       VinNo
     });
     await vehicleCreated.save();
+    const driverr = await Driver.findById(req.id);
+    driverr.drivervehicletype = vehicleCreated._id;
+    await driverr.save();
     await res
       .status(201)
       .json({ message: "Driver Vehicle Created Successfully" });

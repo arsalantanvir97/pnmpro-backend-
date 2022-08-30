@@ -1,7 +1,7 @@
 import session from "../models/SessionModel";
 import FCM from "fcm-node";
 const serverKey =
-  "AAAAASS08F8:APA91bELDIufJcBeT7Pt7PlWmOZ1oQ5ASHh-HoJFx42wbWpAvTPmuxak-_kRkDEvSGAI6gIju_1ysWGATXIwPTmQ80YehegWJlwfZsnDAgNDSHHUW28sufNDEoVxJI4QRiKROca0OaiG";
+  "AAAAJYdj63I:APA91bF423InZDDdMtymHyA2Xu1hfILeLK5Xra1g_yaPALJkMTSnUGkTdhlXBb2J6Nz404NLu6TOagFuCg3LPlzQqZsB_VYnrJ-PEhoufoWvP3NQCVNdFUjfFR6m0QA70OpuD9WWTHJH";
 const fcm = new FCM(serverKey);
 
  const SendPushNotification = async (notification) => {
