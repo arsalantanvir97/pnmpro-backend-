@@ -13,6 +13,8 @@ import {
   generateHash
 } from "../queries";
 import Session from "../models/SessionModel";
+import Notification from "../models/NotificationModel";
+
 import CreateNotification from "../utills/notification.js";
 
 const registerUser = asyncHandler(async (req, res) => {

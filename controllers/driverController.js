@@ -62,7 +62,7 @@ const login = asyncHandler(async (req, res) => {
   console.log("authAdmin");
   const { email, password, deviceId, device_type } = req.body;
 
-  const driver = await Driver.findOne({ email: email.toLowerCase() });
+  const driver = await Driver.findOne({ email: email.toLowerCase() }).populate('drivervehicletype');
 
   if (driver && (await driver.matchPassword(password))) {
     if (
@@ -90,6 +90,7 @@ const login = asyncHandler(async (req, res) => {
         email: driver.email,
         phone: driver.phone,
         location: driver.location,
+        drivervehicletype: driver.drivervehicletype,
 
         userImage: driver.userImage,
         token: generateToken(driver._id)
@@ -138,7 +139,7 @@ const changepassword = async (req, res) => {
     const { existingpassword, newpassword, confirm_password } = req.body;
 
     console.log("req.body", req.body);
-    const driver = await Driver.findOne({ _id: req.id });
+    const driver = await Driver.findOne({ _id: req.id }).populate('drivervehicletype');;
 
     if (driver && (await driver.matchPassword(existingpassword))) {
       console.log("block1");
@@ -219,7 +220,8 @@ const driverlogs = async (req, res) => {
         limit: req.query.perPage,
         lean: true,
         sort: "_id",
-        select: "-password"
+        select: "-password",
+        populate:'drivervehicletype'
       }
     );
     await res.status(200).json({
@@ -250,7 +252,7 @@ const toggleActiveStatus = async (req, res) => {
 };
 const getDriverDetails = async (req, res) => {
   try {
-    const driver = await Driver.findById(req.params.id)
+    const driver = await Driver.findById(req.params.id).populate('drivervehicletype')
       .lean()
       .select("-password");
     await res.status(201).json({
@@ -334,7 +336,7 @@ const editProfile = asyncHandler(async (req, res) => {
     req.files.user_image[0] &&
     req.files.user_image[0].path;
 
-  const driver = await Driver.findOne({ _id: req.id });
+  const driver = await Driver.findOne({ _id: req.id }).populate('drivervehicletype');;
   driver.firstName = firstName ? firstName : driver.firstName;
   driver.lastName = lastName ? lastName : driver.lastName;
   driver.phone = phone ? phone : driver.phone;

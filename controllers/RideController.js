@@ -140,6 +140,7 @@ const rideDetails = async (req, res) => {
 const acceptRide = async (req, res) => {
   try {
     const ride = await BookRide.findById(req.params.id);
+    ride.rideStatus = "Accepted";
     ride.driver = req.id;
     await ride.save();
     await Payment.findOneAndUpdate(
@@ -156,7 +157,7 @@ const acceptRide = async (req, res) => {
       },
       userId: ride.user
     });
-     const notification = {
+    const notification = {
       notifiableId: null,
       notificationType: "Ride Accepted",
       title: "Ride Accepted",
@@ -208,16 +209,19 @@ const reportRide = async (req, res) => {
 };
 
 const userRides = async (req, res) => {
+  console.log("req.id", req.id);
   try {
-    const ride = await BookRide.find({ user: req.id }).populate({
-      path: "user vehicletype driver",
-      populate: {
-        path: "drivervehicletype",
+    const ride = await BookRide.find({ user: req.id })
+      .populate({
+        path: "user vehicletype driver",
         populate: {
-          path: "vehicletype"
+          path: "drivervehicletype",
+          populate: {
+            path: "vehicletype"
+          }
         }
-      }
-    });
+      })
+      .sort({ $natural: -1 });
 
     res.status(201).json({
       ride
@@ -391,7 +395,7 @@ const requestTrack = async (req, res) => {
       },
       userId: ride.driver
     });
-    
+
     res.status(201).json({
       message: "Request Track"
     });

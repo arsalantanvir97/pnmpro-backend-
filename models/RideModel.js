@@ -13,7 +13,7 @@ const RideSchema = mongoose.Schema(
       default:0
     },
     rideStatus: {
-      type: String
+      type: String,default:'Pending'
     },
     reportReason: {
       type: String
