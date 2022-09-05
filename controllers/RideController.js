@@ -22,6 +22,7 @@ const bookaRide = async (req, res) => {
   } = req.body;
   let discountedfare = 0;
   let payableamount = 0;
+  let totalbill = 0;
 
   try {
     const vehicletype = await VehicleType.findById(vehicletypeid);
