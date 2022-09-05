@@ -18,34 +18,38 @@ const bookaRide = async (req, res) => {
     dropofflocation,
     promocode,
     pickup_address,
-    dropoff_address,
-    walletpriority
+    dropoff_address
   } = req.body;
   let discountedfare = 0;
-  let totalbill = 0;
+  let payableamount = 0;
 
   try {
     const vehicletype = await VehicleType.findById(vehicletypeid);
     totalbill = vehicletype.rate;
+    payableamount = vehicletype.rate;
+
     if (promocode) {
       const promoCode = await PromoCode.findById(promocode);
       discountedfare = promoCode.discount;
-      totalbill = totalbill / promoCode.discount;
-    } else if (walletpriority) {
-      const wallet = await Wallet.findOne({ user: req.id });
-      if (wallet.amount >= totalbill) {
-        wallet.amount = wallet.amount - totalbill;
-        await wallet.save();
-      } else {
-        return await res.status(203).json({
-          message: "No enough amount in wallet to book this ride"
-        });
-      }
+      payableamount = payableamount / promoCode.discount;
     }
+    //  else if (walletpriority) {
+    //   const wallet = await Wallet.findOne({ user: req.id });
+    //   if (wallet.amount >= totalbill) {
+    //     wallet.amount = wallet.amount - totalbill;
+    //     await wallet.save();
+    //   } else {
+    //     return await res.status(203).json({
+    //       message: "No enough amount in wallet to book this ride"
+    //     });
+    //   }
+    // }
     const createBookRide = await BookRide.create({
       paymentMethod: walletpriority ? "Wallet" : paymentMethod,
       vehicletype,
       pickup_address,
+      payableamount,
+      walletpriority: req.body.walletpriority ? req.body.walletpriority : false,
       dropoff_address,
       pickuplocation: { type: "Point", coordinates: pickuplocation },
       dropofflocation: { type: "Point", coordinates: dropofflocation },
@@ -56,12 +60,12 @@ const bookaRide = async (req, res) => {
       user: req.id
     });
     await createBookRide.save();
-    const payment = await Payment.create({
-      date: new Date(),
-      ride: createBookRide._id,
-      user: req.id
-    });
-    await payment.save();
+    // const payment = await Payment.create({
+    //   date: new Date(),
+    //   ride: createBookRide._id,
+    //   user: req.id
+    // });
+    // await payment.save();
     let driverid = [];
     const driver = await Driver.find({
       location: {
@@ -186,11 +190,7 @@ const acceptRide = async (req, res) => {
     ride.rideStatus = "Accepted";
     ride.driver = req.id;
     await ride.save();
-    await Payment.findOneAndUpdate(
-      { ride: req.params.id },
-      { driver: req.id },
-      { new: true, upsert: true }
-    );
+  
     await SendPushNotification2({
       title: "Ride Accepted",
       body: `A driver having id ${req.id} have accepted your ride`,
@@ -519,6 +519,23 @@ const endRide = async (req, res) => {
   try {
     const ride = await BookRide.findById(req.params.id);
     ride.rideStatus = "Completed";
+    if (ride.walletpriority) {
+      const wallet = await Wallet.findOne({ user: ride.user });
+      if (wallet.amount >= payableamount) {
+        ride.payableamount = 0;
+        ride.rideStatus = "Paid";
+        const payment = await Payment.create({
+          date: new Date(),
+          ride: ride._id,
+          user: ride.user,
+          driver: ride.driver
+        });
+        await payment.save();
+      }
+      wallet.amount = wallet.amount - payableamount;
+      ride.payableamount = ride.payableamount - wallet.amount;
+      await wallet.save();
+    }
     // ride.rideStatus='Completed'
     await ride.save();
     res.status(201).json({
@@ -533,9 +550,25 @@ const endRide = async (req, res) => {
 const submitAmount = async (req, res) => {
   try {
     const ride = await BookRide.findById(req.params.id);
-    ride.recievedAmount = Number(req.body.recievedAmount);
-    // ride.rideStatus='Completed'
+    let recievedAmount = Number(req.body.recievedAmount);
+    recievedAmount = recievedAmount - ride.payableamount;
+    ride.payableamount = 0;
+    if (req.body.returnwallet) {
+      const wallet = await Wallet.findOne({ user: ride.user });
+      wallet.amount = wallet.amount + recievedAmount;
+      await wallet.save();
+    }
+    await payment.save();
+    ride.rideStatus = "Paid";
     await ride.save();
+    const payment = await Payment.create({
+      date: new Date(),
+      ride: ride._id,
+      user: ride.user,
+      driver: ride.driver
+    });
+    await payment.save();
+
     res.status(201).json({
       message: "Submit Amount"
     });
@@ -577,7 +610,7 @@ const getDriverRating = async (req, res) => {
       {
         $group: {
           _id: "$rating",
-          totalRating: { $sum: 1 },
+          totalRating: { $sum: 1 }
           // avgrating: { $avg: "$rating" }
 
           //   totalRating: { $sum:"$rating" },
@@ -587,14 +620,15 @@ const getDriverRating = async (req, res) => {
       { $sort: { totalRating: -1 } }
     ]);
     let averagerating = 0;
-    let avgratediviser=0
-    reviewCount.map((avg) => {averagerating += avg._id * avg.totalRating
-      avgratediviser+=avg.totalRating
+    let avgratediviser = 0;
+    reviewCount.map((avg) => {
+      averagerating += avg._id * avg.totalRating;
+      avgratediviser += avg.totalRating;
     });
-    console.log("reviewCount", reviewCount, averagerating/avgratediviser);
+    console.log("reviewCount", reviewCount, averagerating / avgratediviser);
     await res.status(201).json({
       rating,
-      averagerating:averagerating/avgratediviser,
+      averagerating: averagerating / avgratediviser,
       reviewCount
     });
   } catch (error) {

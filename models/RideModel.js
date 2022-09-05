@@ -8,6 +8,9 @@ const RideSchema = mongoose.Schema(
     totalbill: {
       type: Number
     },
+    payableamount: {
+      type: Number
+    },
     topupAmount: {
       type: Number,
       default: 0
@@ -51,6 +54,7 @@ const RideSchema = mongoose.Schema(
     discountedfare: {
       type: Number
     },
+    walletpriority: { type: Boolean },
     recievedAmount: {
       type: Number
     },
@@ -68,7 +72,11 @@ const RideSchema = mongoose.Schema(
       coordinates: { type: [Number] }
     },
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    driver: { type: mongoose.Schema.Types.ObjectId, ref: "Driver" ,default:null}
+    driver: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Driver",
+      default: null
+    }
   },
   {
     timestamps: true

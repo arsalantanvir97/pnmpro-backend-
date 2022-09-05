@@ -17,7 +17,7 @@ const WalletSchema = mongoose.Schema(
     amount: {
       type: Number
     },
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User" }
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "User"||"Driver" }
   },
   {
     timestamps: true
