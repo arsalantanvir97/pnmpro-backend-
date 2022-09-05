@@ -9,7 +9,7 @@ import Wallet from "../models/WalletModel";
 import Payment from "../models/PaymentModel";
 import CreateNotification from "../utills/notification";
 import SendPushNotification2 from "../services/SendPushNotification2";
-
+import Mongoose from "mongoose";
 const bookaRide = async (req, res) => {
   const {
     paymentMethod,
@@ -145,14 +145,12 @@ const rideDetails = async (req, res) => {
 };
 const incomingRideDetails = async (req, res) => {
   try {
-    console.log('req.id',req.id);
+    console.log("req.id", req.id);
     const rides = await BookRide.find({
       $and: [
-        
-          { rideStatus: 'Pending' } ,
-          { drivers: { $in: req.id } }
+        { rideStatus: "Pending" },
+        { drivers: { $in: req.id } }
         // { _id: req.params.id },
-        
       ]
     })
       .populate({
@@ -179,7 +177,7 @@ const incomingRideDetails = async (req, res) => {
 const acceptRide = async (req, res) => {
   try {
     const ride = await BookRide.findById(req.params.id);
-    console.log('re',ride);
+    console.log("re", ride);
     if (ride.driver) {
       return res.status(202).json({
         message: "Ride already accepted by a driver"
@@ -572,8 +570,32 @@ const getDriverRating = async (req, res) => {
       .populate("user ride driver")
       .select("-password")
       .lean();
+
+    let reviewCount = await Review.aggregate([
+      { $match: { driver: Mongoose.mongo.ObjectId(req.id) } },
+
+      {
+        $group: {
+          _id: "$rating",
+          totalRating: { $sum: 1 },
+          // avgrating: { $avg: "$rating" }
+
+          //   totalRating: { $sum:"$rating" },
+          //   detail: { $first: '$$ROOT' },
+        }
+      },
+      { $sort: { totalRating: -1 } }
+    ]);
+    let averagerating = 0;
+    let avgratediviser=0
+    reviewCount.map((avg) => {averagerating += avg._id * avg.totalRating
+      avgratediviser+=avg.totalRating
+    });
+    console.log("reviewCount", reviewCount, averagerating/avgratediviser);
     await res.status(201).json({
-      rating
+      rating,
+      averagerating:averagerating/avgratediviser,
+      reviewCount
     });
   } catch (error) {
     res.status(500).json({
