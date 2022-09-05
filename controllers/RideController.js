@@ -8,6 +8,7 @@ import SoundTrack from "../models/SoundTrackModel";
 import Wallet from "../models/WalletModel";
 import Payment from "../models/PaymentModel";
 import CreateNotification from "../utills/notification";
+import SendPushNotification2 from "../services/SendPushNotification2";
 
 const bookaRide = async (req, res) => {
   const {
@@ -16,6 +17,8 @@ const bookaRide = async (req, res) => {
     pickuplocation,
     dropofflocation,
     promocode,
+    pickup_address,
+    dropoff_address,
     walletpriority
   } = req.body;
   let discountedfare = 0;
@@ -42,6 +45,8 @@ const bookaRide = async (req, res) => {
     const createBookRide = await BookRide.create({
       paymentMethod: walletpriority ? "Wallet" : paymentMethod,
       vehicletype,
+      pickup_address,
+      dropoff_address,
       pickuplocation: { type: "Point", coordinates: pickuplocation },
       dropofflocation: { type: "Point", coordinates: dropofflocation },
       isPaid: true,
@@ -69,6 +74,9 @@ const bookaRide = async (req, res) => {
       }
     }).limit(5);
     driver.map((drive) => driverid.push(drive._id));
+    createBookRide.drivers = driverid;
+    await createBookRide.save();
+
     await SendPushNotification({
       title: "Incoming Ride",
       body: `A user having id ${req.id} wants to book a ride of id: ${createBookRide._id}`,
@@ -101,7 +109,6 @@ const bookaRide = async (req, res) => {
       })
       .select("-password")
       .lean();
-
     await res.status(201).json({
       createBookRide: ride
     });
@@ -136,10 +143,48 @@ const rideDetails = async (req, res) => {
     });
   }
 };
+const incomingRideDetails = async (req, res) => {
+  try {
+    console.log('req.id',req.id);
+    const rides = await BookRide.find({
+      $and: [
+        
+          { rideStatus: 'Pending' } ,
+          { drivers: { $in: req.id } }
+        // { _id: req.params.id },
+        
+      ]
+    })
+      .populate({
+        path: "user vehicletype driver",
+        populate: {
+          path: "drivervehicletype",
+          populate: {
+            path: "vehicletype"
+          }
+        }
+      })
+      .select("-password")
+      .lean();
 
+    res.status(201).json({
+      rides
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.toString()
+    });
+  }
+};
 const acceptRide = async (req, res) => {
   try {
     const ride = await BookRide.findById(req.params.id);
+    console.log('re',ride);
+    if (ride.driver) {
+      return res.status(202).json({
+        message: "Ride already accepted by a driver"
+      });
+    }
     ride.rideStatus = "Accepted";
     ride.driver = req.id;
     await ride.save();
@@ -148,7 +193,7 @@ const acceptRide = async (req, res) => {
       { driver: req.id },
       { new: true, upsert: true }
     );
-    await SendPushNotification({
+    await SendPushNotification2({
       title: "Ride Accepted",
       body: `A driver having id ${req.id} have accepted your ride`,
       payload: {
@@ -278,7 +323,7 @@ const startRide = async (req, res) => {
     ride.rideStatus = "Started";
 
     await ride.save();
-    await SendPushNotification({
+    await SendPushNotification2({
       title: "Ride Started",
       body: `A driver having id ${req.id} have started the ride`,
       payload: {
@@ -340,7 +385,7 @@ const pauseRide = async (req, res) => {
     }
     ride.rideStatus = "Paused";
     await ride.save();
-    await SendPushNotification({
+    await SendPushNotification2({
       title: "Ride Paused",
       body: `A driver having id ${req.id} have paused your ride`,
       payload: {
@@ -365,7 +410,7 @@ const resumeRide = async (req, res) => {
     ride.rideStatus = "Resumed";
 
     await ride.save();
-    await SendPushNotification({
+    await SendPushNotification2({
       title: "Ride Resumed",
       body: `A driver having id ${req.id} have resumed the ride`,
       payload: {
@@ -574,5 +619,6 @@ export {
   addnewsong,
   driverSongs,
   getUserRideMusic,
-  endRide
+  endRide,
+  incomingRideDetails
 };

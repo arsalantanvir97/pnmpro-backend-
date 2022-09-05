@@ -105,6 +105,7 @@ httpsServer.listen(process.env.PORT, () => {
       "\u001b[0m"
   );
 });
+
 const io = require("./utills/socket").init(httpsServer);
 
 // Add a binding to handle '/tests'

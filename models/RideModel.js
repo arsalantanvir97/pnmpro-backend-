@@ -10,10 +10,11 @@ const RideSchema = mongoose.Schema(
     },
     topupAmount: {
       type: Number,
-      default:0
+      default: 0
     },
     rideStatus: {
-      type: String,default:'Pending'
+      type: String,
+      default: "Pending"
     },
     reportReason: {
       type: String
@@ -24,6 +25,14 @@ const RideSchema = mongoose.Schema(
     rejectReason: {
       type: String
     },
+
+    pickup_address: {
+      type: String
+    },
+    dropoff_address: {
+      type: String
+    },
+
     reviews: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -33,6 +42,12 @@ const RideSchema = mongoose.Schema(
     estimatedfare: {
       type: Number
     },
+    drivers: [
+      {
+        type: String
+      }
+    ],
+
     discountedfare: {
       type: Number
     },
@@ -53,7 +68,7 @@ const RideSchema = mongoose.Schema(
       coordinates: { type: [Number] }
     },
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    driver: { type: mongoose.Schema.Types.ObjectId, ref: "Driver" }
+    driver: { type: mongoose.Schema.Types.ObjectId, ref: "Driver" ,default:null}
   },
   {
     timestamps: true
