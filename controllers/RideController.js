@@ -95,7 +95,7 @@ const bookaRide = async (req, res) => {
       notifiableId: null,
       notificationType: "Incoming Ride",
       title: "Incoming Ride",
-      body: `A user having id of ${req.id} havr just created an order of id ${createBookRide._id}`,
+      body: `A user having id of ${req.id} wants to book a ride of id: ${createBookRide._id}`,
       payload: {
         type: "Ride",
         id: driverid
