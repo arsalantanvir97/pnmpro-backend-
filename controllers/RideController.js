@@ -74,7 +74,8 @@ const bookaRide = async (req, res) => {
           $geometry: {
             type: "Point",
             coordinates: pickuplocation
-          }
+          },
+          $maxDistance: 5000,
         }
       }
     }).limit(5);
@@ -191,7 +192,7 @@ const acceptRide = async (req, res) => {
     ride.rideStatus = "Accepted";
     ride.driver = req.id;
     await ride.save();
-  
+
     await SendPushNotification2({
       title: "Ride Accepted",
       body: `A driver having id ${req.id} have accepted your ride`,
@@ -618,7 +619,7 @@ const getDriverRating = async (req, res) => {
           //   detail: { $first: '$$ROOT' },
         }
       },
-      { $sort: { totalRating: -1 } }
+      { $sort: { _id: -1 } }
     ]);
     let averagerating = 0;
     let avgratediviser = 0;
@@ -626,11 +627,43 @@ const getDriverRating = async (req, res) => {
       averagerating += avg._id * avg.totalRating;
       avgratediviser += avg.totalRating;
     });
+    const arr = [
+      {
+        _id: 5,
+        totalRating: 0
+      },
+      {
+        _id: 4,
+        totalRating: 0
+      },
+      {
+        _id: 3,
+        totalRating: 0
+      },
+      {
+        _id: 2,
+        totalRating: 0
+      },
+      {
+        _id: 1,
+        totalRating: 0
+      }
+    ];
+    reviewCount.forEach((data) => {
+      arr.forEach((dataa,index) => {
+        if (data._id == dataa._id) {
+         arr[index]=  {
+          _id: dataa._id,
+          totalRating: data.totalRating
+        }
+        }
+      });
+    });
     console.log("reviewCount", reviewCount, averagerating / avgratediviser);
     await res.status(201).json({
       rating,
       averagerating: averagerating / avgratediviser,
-      reviewCount
+      reviewCount:arr,
     });
   } catch (error) {
     res.status(500).json({
