@@ -52,8 +52,14 @@ const bookaRide = async (req, res) => {
       payableamount,
       walletpriority: req.body.walletpriority ? req.body.walletpriority : false,
       dropoff_address,
-      pickuplocation: { type: "Point", coordinates: pickuplocation },
-      dropofflocation: { type: "Point", coordinates: dropofflocation },
+      pickuplocation: {
+        type: "Point",
+        coordinates: [pickuplocation[1], pickuplocation[0]]
+      },
+      dropofflocation: {
+        type: "Point",
+        coordinates: [dropofflocation[1], dropofflocation[0]]
+      },
       isPaid: true,
       estimatedfare: vehicletype.rate,
       totalbill,
@@ -67,22 +73,23 @@ const bookaRide = async (req, res) => {
     //   user: req.id
     // });
     // await payment.save();
+    console.log("pickuplocation", pickuplocation);
     let driverid = [];
     const driver = await Driver.find({
       location: {
         $near: {
           $geometry: {
             type: "Point",
-            coordinates: pickuplocation
+            coordinates: [pickuplocation[1], pickuplocation[0]]
           },
-          $maxDistance: 5000,
+          $maxDistance: 7000
         }
       }
-    }).limit(5);
+    });
     driver.map((drive) => driverid.push(drive._id));
     createBookRide.drivers = driverid;
     await createBookRide.save();
-
+    console.log("driverid0", driverid);
     await SendPushNotification({
       title: "Incoming Ride",
       body: `A user having id ${req.id} wants to book a ride of id: ${createBookRide._id}`,
@@ -92,17 +99,17 @@ const bookaRide = async (req, res) => {
       },
       userId: driverid
     });
-    const notification = {
-      notifiableId: null,
-      notificationType: "Incoming Ride",
-      title: "Incoming Ride",
-      body: `A user having id of ${req.id} wants to book a ride of id: ${createBookRide._id}`,
-      payload: {
-        type: "Ride",
-        id: driverid
-      }
-    };
-    CreateNotification(notification);
+    // const notification = {
+    //   notifiableId: null,
+    //   notificationType: "Incoming Ride",
+    //   title: "Incoming Ride",
+    //   body: `A user having id of ${req.id} wants to book a ride of id: ${createBookRide._id}`,
+    //   payload: {
+    //     type: "Ride",
+    //     id: driverid
+    //   }
+    // };
+    // CreateNotification(notification);
     const ride = await BookRide.findById(createBookRide._id)
       .populate({
         path: "user vehicletype driver",
@@ -650,12 +657,12 @@ const getDriverRating = async (req, res) => {
       }
     ];
     reviewCount.forEach((data) => {
-      arr.forEach((dataa,index) => {
+      arr.forEach((dataa, index) => {
         if (data._id == dataa._id) {
-         arr[index]=  {
-          _id: dataa._id,
-          totalRating: data.totalRating
-        }
+          arr[index] = {
+            _id: dataa._id,
+            totalRating: data.totalRating
+          };
         }
       });
     });
@@ -663,7 +670,7 @@ const getDriverRating = async (req, res) => {
     await res.status(201).json({
       rating,
       averagerating: averagerating / avgratediviser,
-      reviewCount:arr,
+      reviewCount: arr
     });
   } catch (error) {
     res.status(500).json({
