@@ -46,7 +46,7 @@ const bookaRide = async (req, res) => {
     //   }
     // }
     const createBookRide = await BookRide.create({
-      paymentMethod: walletpriority ? "Wallet" : paymentMethod,
+      paymentMethod: req.body.walletpriority ? "Wallet" : paymentMethod,
       vehicletype,
       pickup_address,
       payableamount,
