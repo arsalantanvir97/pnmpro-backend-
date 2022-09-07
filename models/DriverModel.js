@@ -10,6 +10,10 @@ const DriverSchema = mongoose.Schema(
     lastName: {
       type: String
     },
+    flag: {
+      type: Boolean,
+      default:false
+    },
     phone: {
       type: String
     },

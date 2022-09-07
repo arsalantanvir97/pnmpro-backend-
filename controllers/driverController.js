@@ -50,6 +50,8 @@ const registerDriver = asyncHandler(async (req, res) => {
       lastName: driver.lastName,
       email: driver.email,
       license: driver.license,
+      flag: driver.flag,
+
       token: generateToken(driver._id)
     });
   } else {
@@ -88,6 +90,8 @@ const login = asyncHandler(async (req, res) => {
         firstName: driver.firstName,
         lastName: driver.lastName,
         email: driver.email,
+        flag: driver.flag,
+
         phone: driver.phone,
         location: driver.location,
         drivervehicletype: driver.drivervehicletype,

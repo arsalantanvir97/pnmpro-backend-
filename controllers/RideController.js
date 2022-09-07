@@ -76,15 +76,20 @@ const bookaRide = async (req, res) => {
     console.log("pickuplocation", pickuplocation);
     let driverid = [];
     const driver = await Driver.find({
-      location: {
-        $near: {
-          $geometry: {
-            type: "Point",
-            coordinates: [pickuplocation[1], pickuplocation[0]]
-          },
-          $maxDistance: 7000
+      $and: [
+        { flag: false },
+        {
+          location: {
+            $near: {
+              $geometry: {
+                type: "Point",
+                coordinates: [pickuplocation[1], pickuplocation[0]]
+              },
+              $maxDistance: 7000
+            }
+          }
         }
-      }
+      ]
     });
     driver.map((drive) => driverid.push(drive._id));
     createBookRide.drivers = driverid;
@@ -199,7 +204,13 @@ const acceptRide = async (req, res) => {
     ride.rideStatus = "Accepted";
     ride.driver = req.id;
     await ride.save();
-
+    await Driver.findOneAndUpdate(
+      { _id: req.id },
+      {
+        flag: true
+      },
+      { new: true, upsert: true, returnNewDocument: true }
+    );
     await SendPushNotification2({
       title: "Ride Accepted",
       body: `A driver having id ${req.id} have accepted your ride`,
@@ -314,6 +325,13 @@ const cancelRides = async (req, res) => {
     ride.rejectReason = rejectReason;
 
     await ride.save();
+    await Driver.findOneAndUpdate(
+      { _id: ride.driver },
+      {
+        flag: false
+      },
+      { new: true, upsert: true, returnNewDocument: true }
+    );
     res.status(201).json({
       message: "Ride Cancelled"
     });
@@ -545,6 +563,13 @@ const endRide = async (req, res) => {
       ride.payableamount = ride.payableamount - wallet.amount;
       await wallet.save();
     }
+    await Driver.findOneAndUpdate(
+      { _id: ride.driver },
+      {
+        flag: false
+      },
+      { new: true, upsert: true, returnNewDocument: true }
+    );
     // ride.rideStatus='Completed'
     await ride.save();
     res.status(201).json({
