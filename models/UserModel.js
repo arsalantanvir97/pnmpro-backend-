@@ -1,51 +1,53 @@
-import mongoose from "mongoose";
-import bcrypt from "bcryptjs";
-import mongoosePaginate from "mongoose-paginate-v2";
+import mongoose from 'mongoose'
+import bcrypt from 'bcryptjs'
+import mongoosePaginate from 'mongoose-paginate-v2'
 
 const UserSchema = mongoose.Schema(
   {
     firstName: {
-      type: String
+      type: String,
     },
     lastName: {
-      type: String
+      type: String,
     },
     phone: {
-      type: String
+      type: String,
     },
     email: {
       type: String,
       required: true,
-      unique: true
+      unique: true,
     },
     password: {
       type: String,
-      required: true
+      required: true,
     },
     userImage: { type: String },
-    status: { type: Boolean, default: true }
+    status: { type: Boolean, default: true },
+    soa_id: { type: String },
+    soa_token: { type: String },
   },
   {
-    timestamps: true
+    timestamps: true,
   }
-);
+)
 
 UserSchema.methods.matchPassword = async function (enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
-};
+  return await bcrypt.compare(enteredPassword, this.password)
+}
 
-UserSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) {
-    next();
+UserSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) {
+    next()
   }
 
-  const salt = await bcrypt.genSalt(12);
-  this.password = await bcrypt.hash(this.password, salt);
-});
+  const salt = await bcrypt.genSalt(12)
+  this.password = await bcrypt.hash(this.password, salt)
+})
 
-UserSchema.plugin(mongoosePaginate);
-UserSchema.index({ "$**": "text" });
+UserSchema.plugin(mongoosePaginate)
+UserSchema.index({ '$**': 'text' })
 
-const User = mongoose.model("User", UserSchema);
+const User = mongoose.model('User', UserSchema)
 
-export default User;
+export default User

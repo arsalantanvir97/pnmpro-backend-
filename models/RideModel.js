@@ -1,89 +1,94 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose'
 
 const RideSchema = mongoose.Schema(
   {
     paymentMethod: {
-      type: String
+      type: String,
     },
     totalbill: {
-      type: Number
+      type: Number,
     },
     payableamount: {
-      type: Number
+      type: Number,
     },
     topupAmount: {
       type: Number,
-      default: 0
+      default: 0,
     },
     rideStatus: {
       type: String,
-      default: "Pending"
+      default: 'Pending',
     },
     reportReason: {
-      type: String
+      type: String,
     },
     receipt: {
-      type: String
+      type: String,
     },
     rejectReason: {
-      type: String
+      type: String,
     },
-
+    rejeciontReason: {
+      type: String,
+    },
     pickup_address: {
-      type: String
+      type: String,
     },
     dropoff_address: {
-      type: String
+      type: String,
+    },
+    rating: {
+      type: Number,
     },
 
     reviews: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Review"
-      }
+        ref: 'Review',
+      },
     ],
     estimatedfare: {
-      type: Number
+      type: Number,
     },
     drivers: [
       {
-        type: String
-      }
+        type: String,
+      },
     ],
 
     discountedfare: {
-      type: Number
+      type: Number,
     },
     walletpriority: { type: Boolean },
     recievedAmount: {
-      type: Number
+      type: Number,
     },
-    vehicletype: { type: mongoose.Schema.Types.ObjectId, ref: "VehicleType" },
+    vehicletype: { type: mongoose.Schema.Types.ObjectId, ref: 'VehicleType' },
     isPaid: {
       type: Boolean,
-      default: false
+      default: false,
     },
     pickuplocation: {
-      type: { type: String, default: "Point" },
-      coordinates: { type: [Number] }
+      type: { type: String, default: 'Point' },
+      coordinates: { type: [Number] },
     },
     dropofflocation: {
-      type: { type: String, default: "Point" },
-      coordinates: { type: [Number] }
+      type: { type: String, default: 'Point' },
+      coordinates: { type: [Number] },
     },
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     driver: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Driver",
-      default: null
-    }
+      ref: 'Driver',
+      default: null,
+    },
   },
   {
-    timestamps: true
+    timestamps: true,
   }
-);
-RideSchema.index({ location: "2dsphere" });
+)
+RideSchema.index({ location: '2dsphere' })
 
-const Ride = mongoose.model("Ride", RideSchema);
+const Ride = mongoose.model('Ride', RideSchema)
 
-export default Ride;
+export default Ride
