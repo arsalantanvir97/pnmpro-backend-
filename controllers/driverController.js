@@ -44,11 +44,11 @@ const registerDriver = asyncHandler(async (req, res) => {
   })
 
   if (driver) {
-    await AddUserSOA(
-      driver._id,
-      driver.firstName,
-      'https://www.w3schools.com/w3images/avatar2.png'
-    )
+    // await AddUserSOA(
+    //   driver._id,
+    //   driver.firstName,
+    //   'https://www.w3schools.com/w3images/avatar2.png'
+    // )
 
     res.status(201).json({
       _id: driver._id,
@@ -76,9 +76,9 @@ const login = asyncHandler(async (req, res) => {
   )
 
   if (driver && (await driver.matchPassword(password))) {
-    const { token, id } = await LoginUserSOA(driver._id)
-    driver.soa_id = id
-    driver.soa_token = token
+    // const { token, id } = await LoginUserSOA(driver._id)
+    // driver.soa_id = id
+    // driver.soa_token = token
     await driver.save()
     if (
       driver.adminApproval == 'Rejected' ||
