@@ -1,7 +1,7 @@
 import axios from 'axios'
 
-const { SOA_APP_ID, SOA_SECRET_KEY } = process.env
-
+const SOA_APP_ID='52d98b7d254f2f21651aaa0ca482e51b'
+const SOA_SECRET_KEY='$2y$10$fQ04Pjp9h/ttlNi6IdeQ7OZ4EsH3dU0hhAgBgMBa0O1aqKGU/3rYG'
 const SOA_CHAT_DOMAIN = 'https://dev28.onlinetestingserver.com/soachatapi/api'
 
 export const AddUserSOA = async (id, name, image) =>
@@ -18,16 +18,23 @@ export const AddUserSOA = async (id, name, image) =>
   })
 
 export const LoginUserSOA = async (id) => {
-  const loginUser = await axios({
-    url: `${SOA_CHAT_DOMAIN}/login`,
-    method: 'POST',
-    data: {
-      appid: SOA_APP_ID,
-      secret_key: SOA_SECRET_KEY,
-      id,
-    },
-  })
-  return { token: loginUser.data.token, id: loginUser.data.data.id }
+  console.log('SOA_APP_ID, SOA_SECRET_KEY',SOA_APP_ID, SOA_SECRET_KEY,id)
+  try {
+    const loginUser = await axios({
+      url: `${SOA_CHAT_DOMAIN}/login`,
+      method: 'POST',
+      data: {
+        appid: SOA_APP_ID,
+        secret_key: SOA_SECRET_KEY,
+        id,
+      },
+    })
+    console.log('LoginUserSOA',loginUser)
+    return { token: loginUser.data.token, id: loginUser.data.data.id }
+  } catch (error) {
+    console.log('error',error)
+  }
+  
 }
 
 export const MakeFriendsSOA = async (toid, token) =>

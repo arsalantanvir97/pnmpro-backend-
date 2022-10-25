@@ -40,11 +40,11 @@ const registerUser = asyncHandler(async (req, res) => {
   })
 
   if (user) {
-    await AddUserSOA(
-      user._id,
-      user.firstName,
-      'https://www.w3schools.com/w3images/avatar2.png'
-    )
+    // await AddUserSOA(
+    //   user._id,
+    //   user.firstName,
+    //   'https://www.w3schools.com/w3images/avatar2.png'
+    // )
 
     res.status(201).json({
       _id: user._id,
@@ -67,10 +67,10 @@ const login = asyncHandler(async (req, res) => {
   const user = await User.findOne({ email: email.toLowerCase() })
 
   if (user && (await user.matchPassword(password))) {
-    const { token, id } = await LoginUserSOA(user._id)
-    user.soa_id = id
-    user.soa_token = token
-    await user.save()
+    // const { token, id } = await LoginUserSOA(user._id)
+    // user.soa_id = id
+    // user.soa_token = token
+    // await user.save()
 
     const createdataofusers = await Session.findOneAndUpdate(
       { user: user._id },
