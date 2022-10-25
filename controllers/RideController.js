@@ -266,6 +266,9 @@ const reportRide = async (req, res) => {
     const ride = await BookRide.findById(req.params.id)
     ride.rideStatus = 'Reported'
     ride.reportReason = reportReason
+    const driver=await Driver.findById(ride.driver)
+    driver.flag=false
+    await driver.save()
     await ride.save()
     res.status(201).json({
       message: 'Ride Reported',
@@ -547,6 +550,9 @@ const markRidePaid = async (req, res) => {
   try {
     const ride = await BookRide.findById(req.params.id)
     ride.isPaid = true
+    const driver=await Driver.findById(ride.driver)
+    driver.flag=false
+    await driver.save()
     // ride.rideStatus='Completed'
     await ride.save()
     res.status(201).json({
@@ -632,6 +638,9 @@ const submitAmount = async (req, res) => {
       user: ride.user,
       driver: ride.driver,
     })
+    const driver=await Driver.findById(ride.driver)
+    driver.flag=false
+    await driver.save()
     await payment.save()
 
     res.status(201).json({
