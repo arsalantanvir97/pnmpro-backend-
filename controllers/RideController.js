@@ -266,8 +266,8 @@ const reportRide = async (req, res) => {
     const ride = await BookRide.findById(req.params.id)
     ride.rideStatus = 'Reported'
     ride.reportReason = reportReason
-    const driver=await Driver.findById(ride.driver)
-    driver.flag=false
+    const driver = await Driver.findById(ride.driver)
+    driver.flag = false
     await driver.save()
     await ride.save()
     res.status(201).json({
@@ -550,8 +550,8 @@ const markRidePaid = async (req, res) => {
   try {
     const ride = await BookRide.findById(req.params.id)
     ride.isPaid = true
-    const driver=await Driver.findById(ride.driver)
-    driver.flag=false
+    const driver = await Driver.findById(ride.driver)
+    driver.flag = false
     await driver.save()
     // ride.rideStatus='Completed'
     await ride.save()
@@ -585,7 +585,7 @@ const endRide = async (req, res) => {
     ride.rideStatus = 'Completed'
     if (ride.walletpriority) {
       const wallet = await Wallet.findOne({ user: ride.user })
-      if (wallet.amount >= payableamount) {
+      if (wallet.amount >= ride.payableamount) {
         ride.payableamount = 0
         ride.rideStatus = 'Paid'
         const payment = await Payment.create({
@@ -629,7 +629,6 @@ const submitAmount = async (req, res) => {
       wallet.amount = wallet.amount + recievedAmount
       await wallet.save()
     }
-    await payment.save()
     ride.rideStatus = 'Paid'
     await ride.save()
     const payment = await Payment.create({
@@ -638,8 +637,8 @@ const submitAmount = async (req, res) => {
       user: ride.user,
       driver: ride.driver,
     })
-    const driver=await Driver.findById(ride.driver)
-    driver.flag=false
+    const driver = await Driver.findById(ride.driver)
+    driver.flag = false
     await driver.save()
     await payment.save()
 

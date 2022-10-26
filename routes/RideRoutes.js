@@ -31,7 +31,7 @@ import { protect } from '../middlewares/authMIddleware.js'
 router.post('/bookaRide', protect, bookaRide)
 router.get('/rideDetails/:id', protect, rideDetails)
 router.get('/acceptRide/:id', protect, acceptRide)
-router.get('/rejectRide/:id', protect, rejectRide)
+router.post('/rejectRide/:id', protect, rejectRide)
 router.get('/userRides', protect, userRides)
 router.get('/driverRides', protect, driverRides)
 router.post('/cancelRides/:id', protect, cancelRides)
