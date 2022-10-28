@@ -29,8 +29,10 @@ const registerDriver = asyncHandler(async (req, res) => {
   const DriverExists = await Driver.findOne({ email })
 
   if (DriverExists) {
-    res.status(400)
-    throw new Error('Driver already exists')
+    res.status(400).json({
+      message: 'Driver already exists',
+    })
+  
   }
   const driver = await Driver.create({
     firstName,

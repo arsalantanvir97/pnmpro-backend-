@@ -596,7 +596,7 @@ const endRide = async (req, res) => {
         })
         await payment.save()
       }
-      wallet.amount = wallet.amount - payableamount
+      wallet.amount = wallet.amount - ride.payableamount
       ride.payableamount = ride.payableamount - wallet.amount
       await wallet.save()
     }
