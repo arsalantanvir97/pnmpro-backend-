@@ -656,8 +656,14 @@ const addToWallet = async (req, res) => {
   try {
     const ride = await BookRide.findById(req.params.id)
     const wallet = await Wallet.findOne({ user: ride.user })
+    console.log('ride',ride)
+    console.log('wallet',wallet)
+
+    
     if (wallet) {
+      console.log('wallet.amount',wallet.amount,ride.recievedAmount)
       wallet.amount = wallet.amount + ride.recievedAmount
+      console.log('1111')
       // ride.rideStatus='Completed'
       await wallet.save()
     }
