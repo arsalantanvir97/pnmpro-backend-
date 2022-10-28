@@ -60,7 +60,7 @@ const bookaRide = async (req, res) => {
         type: 'Point',
         coordinates: [dropofflocation[1], dropofflocation[0]],
       },
-      isPaid: true,
+      isPaid: false,
       estimatedfare: vehicletype.rate,
       totalbill,
       discountedfare,
@@ -438,7 +438,7 @@ const resumeRide = async (req, res) => {
 
     ride.receipt = receipt
     ride.rideStatus = 'Resumed'
-
+    ride.topupAmount=req.body.topupAmount
     await ride.save()
     await SendPushNotification2({
       title: 'Ride Resumed',
@@ -622,7 +622,7 @@ const submitAmount = async (req, res) => {
   try {
     const ride = await BookRide.findById(req.params.id)
     let recievedAmount = Number(req.body.recievedAmount)
-    recievedAmount = recievedAmount - ride.payableamount
+    ride.recievedAmount = recievedAmount - ride.payableamount
     ride.payableamount = 0
     if (req.body.returnwallet) {
       const wallet = await Wallet.findOne({ user: ride.user })

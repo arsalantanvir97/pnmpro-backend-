@@ -8,6 +8,7 @@ const RideSchema = mongoose.Schema(
     totalbill: {
       type: Number,
     },
+   
     payableamount: {
       type: Number,
     },
@@ -62,6 +63,7 @@ const RideSchema = mongoose.Schema(
     walletpriority: { type: Boolean },
     recievedAmount: {
       type: Number,
+      default:0
     },
     vehicletype: { type: mongoose.Schema.Types.ObjectId, ref: 'VehicleType' },
     isPaid: {
