@@ -661,7 +661,7 @@ const addToWallet = async (req, res) => {
 
     
     if (wallet) {
-      console.log('wallet.amount',wallet.amount,ride.recievedAmount)
+      console.log('wallet.amountt',wallet.amount,ride.recievedAmount)
       wallet.amount = wallet.amount + ride.recievedAmount
       console.log('1111')
       // ride.rideStatus='Completed'
