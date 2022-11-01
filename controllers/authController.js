@@ -15,7 +15,6 @@ import {
 import User from '../models/UserModel.js'
 import Driver from '../models/DriverModel.js'
 import moment from 'moment'
-import { AddUserSOA, LoginUserSOA } from '../services/soa_chat.js'
 
 const registerAdmin = asyncHandler(async (req, res) => {
   const { firstName, lastName, email, password } = req.body
@@ -35,11 +34,11 @@ const registerAdmin = asyncHandler(async (req, res) => {
   })
 
   if (admin) {
-    await AddUserSOA(
-      admin._id,
-      admin.firstName,
-      'https://www.w3schools.com/w3images/avatar2.png'
-    )
+    // await AddUserSOA(
+    //   admin._id,
+    //   admin.firstName,
+    //   'https://www.w3schools.com/w3images/avatar2.png'
+    // )
     res.status(201).json({
       _id: admin._id,
       firstName: admin.firstName,
@@ -61,9 +60,9 @@ const authAdmin = asyncHandler(async (req, res) => {
   const admin = await Admin.findOne({ email })
 
   if (admin && (await admin.matchPassword(password))) {
-    const { token, id } = await LoginUserSOA(admin._id)
-    admin.soa_id = id
-    admin.soa_token = token
+    // const { token, id } = await LoginUserSOA(admin._id)
+    // admin.soa_id = id
+    // admin.soa_token = token
     await admin.save()
 
     res.json({
