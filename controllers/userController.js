@@ -30,7 +30,7 @@ const registerUser = asyncHandler(async (req, res) => {
     res.status(400).json({
       message: 'User already exists',
     })
-   
+
   }
 
   const user = await User.create({
@@ -42,11 +42,11 @@ const registerUser = asyncHandler(async (req, res) => {
   })
 
   if (user) {
-    // await AddUserSOA(
-    //   user._id,
-    //   user.firstName,
-    //   'https://www.w3schools.com/w3images/avatar2.png'
-    // )
+    await AddUserSOA(
+      user._id,
+      user.firstName,
+      'https://www.w3schools.com/w3images/avatar2.png'
+    )
 
     res.status(201).json({
       _id: user._id,
@@ -69,10 +69,10 @@ const login = asyncHandler(async (req, res) => {
   const user = await User.findOne({ email: email.toLowerCase() })
 
   if (user && (await user.matchPassword(password))) {
-    // const { token, id } = await LoginUserSOA(user._id)
-    // user.soa_id = id
-    // user.soa_token = token
-    // await user.save()
+    const { token, id } = await LoginUserSOA(user._id)
+    user.soa_id = id
+    user.soa_token = token
+    await user.save()
 
     const createdataofusers = await Session.findOneAndUpdate(
       { user: user._id },
@@ -89,6 +89,9 @@ const login = asyncHandler(async (req, res) => {
       phone: user.phone,
       userImage: user.userImage,
       token: generateToken(user._id),
+      soa_id: user.soa_id,
+      soa_token: user.soa_token
+
     })
   } else {
     console.log('error')
@@ -142,17 +145,17 @@ const userlogs = async (req, res) => {
     console.log('req.query.searchString', req.query.searchString)
     const searchParam = req.query.searchString
       ? // { $text: { $search: req.query.searchString } }
-        {
-          $or: [
-            {
-              firstName: { $regex: `${req.query.searchString}`, $options: 'i' },
-            },
-            {
-              lastName: { $regex: `${req.query.searchString}`, $options: 'i' },
-            },
-            { email: { $regex: `${req.query.searchString}`, $options: 'i' } },
-          ],
-        }
+      {
+        $or: [
+          {
+            firstName: { $regex: `${req.query.searchString}`, $options: 'i' },
+          },
+          {
+            lastName: { $regex: `${req.query.searchString}`, $options: 'i' },
+          },
+          { email: { $regex: `${req.query.searchString}`, $options: 'i' } },
+        ],
+      }
       : {}
     const status_filter = req.query.status ? { status: req.query.status } : {}
     const from = req.query.from
