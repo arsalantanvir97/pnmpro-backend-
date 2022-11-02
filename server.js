@@ -140,7 +140,7 @@ io.on('connection', (socket) => {
   socket.on('drivercoordinates', async (coordinates) => {
     console.log('abccccccc', coordinates)
     await Driver.findOneAndUpdate(
-      { _id: coordinates.driverid },
+      { _id: coordinates.userId },
       { location: { type: 'Point', coordinates: coordinates.coordinates } },
       { new: true, upsert: true, returnNewDocument: true }
     )
