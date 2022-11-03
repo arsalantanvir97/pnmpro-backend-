@@ -32,7 +32,7 @@ const registerDriver = asyncHandler(async (req, res) => {
     res.status(400).json({
       message: 'Driver already exists',
     })
-  
+
   }
   const driver = await Driver.create({
     firstName,
@@ -40,7 +40,7 @@ const registerDriver = asyncHandler(async (req, res) => {
     email,
     password,
     phone,
-    flag:false,
+    flag: false,
     location: { type: 'Point', coordinates: [0, 0] },
 
     license: userlicense,
@@ -204,17 +204,17 @@ const driverlogs = async (req, res) => {
     )
     const searchParam = req.query.searchString
       ? // { $text: { $search: req.query.searchString } }
-        {
-          $or: [
-            {
-              firstName: { $regex: `${req.query.searchString}`, $options: 'i' },
-            },
-            {
-              lastName: { $regex: `${req.query.searchString}`, $options: 'i' },
-            },
-            { email: { $regex: `${req.query.searchString}`, $options: 'i' } },
-          ],
-        }
+      {
+        $or: [
+          {
+            firstName: { $regex: `${req.query.searchString}`, $options: 'i' },
+          },
+          {
+            lastName: { $regex: `${req.query.searchString}`, $options: 'i' },
+          },
+          { email: { $regex: `${req.query.searchString}`, $options: 'i' } },
+        ],
+      }
       : {}
     const status_filter = req.query.status ? { status: req.query.status } : {}
     const adminApproval_filter = req.query.adminApproval
@@ -274,6 +274,24 @@ const toggleActiveStatus = async (req, res) => {
     })
   }
 }
+const changeStatus = async (req, res) => {
+  const { flag } = req.body
+  try {
+    const driver = await Driver.findById(req.id)
+    console.log('driver', driver)
+    driver.flag = flag
+    await driver.save()
+    await res.status(201).json({
+      driver
+    })
+  } catch (err) {
+    console.log('err', err)
+    res.status(500).json({
+      message: err.toString(),
+    })
+  }
+}
+
 const getDriverDetails = async (req, res) => {
   try {
     const driver = await Driver.findById(req.params.id)
@@ -397,8 +415,15 @@ const getEarning = async (req, res) => {
 const getEarningDetails = async (req, res) => {
   try {
     const payment = await Payment.findById(req.params.id)
-      .populate('user driver ride')
-      .lean()
+      .populate({
+        path: 'user ride driver',
+        populate: {
+          path: 'drivervehicletype',
+          populate: {
+            path: 'vehicletype',
+          },
+        },
+      }).lean()
     await res.status(201).json({
       payment,
     })
@@ -417,6 +442,7 @@ export {
   getEarning,
   getDriverDetails,
   updateStatus,
+  changeStatus,
   login,
   resetPassword,
   changepassword,

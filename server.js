@@ -65,7 +65,7 @@ app.use(
     },
     {
       name: 'license_plate',
-      maxCount: 1,
+      maxCount: 12,
     },
     {
       name: 'ad_video',
@@ -73,7 +73,7 @@ app.use(
     },
     {
       name: 'doc_schedule',
-      maxCount: 1,
+      maxCount: 12,
     },
   ])
 )

@@ -21,7 +21,7 @@ const DriverVehicleTypeSchema = mongoose.Schema(
       required: true
     },
     licensePlate: {
-      type: String,
+      type: Array,
       required: true
     },
     VinNo: {
@@ -29,7 +29,7 @@ const DriverVehicleTypeSchema = mongoose.Schema(
       required: true
     },
     insurancedoc: {
-      type: String,
+      type: Array,
       required: true
     }
   },

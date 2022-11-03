@@ -13,7 +13,8 @@ import {
   changepassword,
   editProfile,
   getEarning,
-  getEarningDetails
+  getEarningDetails,
+  changeStatus
 } from "../controllers/driverController";
 import { protect } from "../middlewares/authMIddleware.js";
 
@@ -32,5 +33,6 @@ router.get("/driver-details/:id", protect, getDriverDetails);
 router.post("/updateStatus/:id", updateStatus);
 router.get("/getEarning", protect, getEarning);
 router.get("/getEarningDetails/:id", protect, getEarningDetails);
+router.post("/changeStatus",protect, changeStatus);
 
 export default router;

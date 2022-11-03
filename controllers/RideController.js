@@ -438,7 +438,7 @@ const resumeRide = async (req, res) => {
 
     ride.receipt = receipt
     ride.rideStatus = 'Resumed'
-    ride.topupAmount=req.body.topupAmount
+    ride.topupAmount = req.body.topupAmount
     await ride.save()
     await SendPushNotification2({
       title: 'Ride Resumed',
@@ -656,12 +656,12 @@ const addToWallet = async (req, res) => {
   try {
     const ride = await BookRide.findById(req.params.id)
     const wallet = await Wallet.findOne({ user: ride.user })
-    console.log('ride',ride)
-    console.log('wallet',wallet)
+    console.log('ride', ride)
+    console.log('wallet', wallet)
 
-    
+
     if (wallet) {
-      console.log('wallet.amountt',wallet.amount,ride.recievedAmount)
+      console.log('wallet.amountt', wallet.amount, ride.recievedAmount)
       wallet.amount = wallet.amount + ride.recievedAmount
       console.log('1111')
       // ride.rideStatus='Completed'
@@ -751,11 +751,48 @@ const getDriverRating = async (req, res) => {
 const getRatingData = async (req, res) => {
   try {
     const rating = await Review.findOne({ ride: req.params.id })
-      .populate('user ride driver')
-      .select('-password')
-      .lean()
+      .populate({
+        path: 'user ride driver',
+        populate: {
+          path: 'drivervehicletype',
+          populate: {
+            path: 'vehicletype',
+          },
+        },
+      }).lean()
     await res.status(201).json({
       rating,
+    })
+  } catch (error) {
+    res.status(500).json({
+      message: error.toString(),
+    })
+  }
+}
+const activeRide = async (req, res) => {
+  try {
+    console.log('activeRidedriverreq.id', req.id)
+    const rides = await BookRide.findOne({
+      $and: [
+        { rideStatus: { $in: ["Accepted", "Started", "Paused", "Resumed", "Completed"] } },
+        { driver: req.id },
+        // { _id: req.params.id },
+      ],
+    })
+      .populate({
+        path: 'user vehicletype driver',
+        populate: {
+          path: 'drivervehicletype',
+          populate: {
+            path: 'vehicletype',
+          },
+        },
+      })
+      .select('-password')
+      .lean()
+
+    res.status(201).json({
+      rides,
     })
   } catch (error) {
     res.status(500).json({
@@ -766,6 +803,7 @@ const getRatingData = async (req, res) => {
 
 export {
   markRidePaid,
+  activeRide,
   submitAmount,
   getRatingData,
   addToWallet,
