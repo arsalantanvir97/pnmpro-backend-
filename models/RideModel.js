@@ -74,6 +74,7 @@ const RideSchema = mongoose.Schema(
       type: { type: String, default: 'Point' },
       coordinates: { type: [Number] },
     },
+    promocode: { type: mongoose.Schema.Types.ObjectId, ref: 'PromoCode' },
     dropofflocation: {
       type: { type: String, default: 'Point' },
       coordinates: { type: [Number] },

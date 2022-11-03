@@ -50,6 +50,7 @@ const bookaRide = async (req, res) => {
       vehicletype,
       pickup_address,
       payableamount,
+      promocode:promocode ?promocode : null,
       walletpriority: req.body.walletpriority ? req.body.walletpriority : false,
       dropoff_address,
       pickuplocation: {
@@ -141,7 +142,7 @@ const rideDetails = async (req, res) => {
   try {
     const ride = await BookRide.findById(req.params.id)
       .populate({
-        path: 'user vehicletype driver',
+        path: 'user vehicletype driver promocode',
         populate: {
           path: 'drivervehicletype',
           populate: {
@@ -172,7 +173,7 @@ const incomingRideDetails = async (req, res) => {
       ],
     })
       .populate({
-        path: 'user vehicletype driver',
+        path: 'user vehicletype driver promocode',
         populate: {
           path: 'drivervehicletype',
           populate: {
@@ -285,7 +286,7 @@ const userRides = async (req, res) => {
   try {
     const ride = await BookRide.find({ user: req.id })
       .populate({
-        path: 'user vehicletype driver',
+        path: 'user vehicletype driver promocode',
         populate: {
           path: 'drivervehicletype',
           populate: {
@@ -308,7 +309,7 @@ const userRides = async (req, res) => {
 const driverRides = async (req, res) => {
   try {
     const ride = await BookRide.find({ driver: req.id }).populate({
-      path: 'user vehicletype driver',
+      path: 'user vehicletype driver promocode',
       populate: {
         path: 'drivervehicletype',
         populate: {
@@ -752,7 +753,7 @@ const getRatingData = async (req, res) => {
   try {
     const rating = await Review.findOne({ ride: req.params.id })
       .populate({
-        path: 'user ride driver',
+        path: 'user ride driver promocode',
         populate: {
           path: 'drivervehicletype',
           populate: {
@@ -780,7 +781,7 @@ const activeRide = async (req, res) => {
       ],
     })
       .populate({
-        path: 'user vehicletype driver',
+        path: 'user vehicletype driver promocode',
         populate: {
           path: 'drivervehicletype',
           populate: {

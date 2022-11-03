@@ -2,6 +2,7 @@ import asyncHandler from 'express-async-handler'
 
 import Driver from '../models/DriverModel'
 import Reset from '../models/ResetModel.js'
+import BookRide from '../models/RideModel'
 
 import generateToken from '../utills/generateJWTtoken.js'
 import generateEmail from '../services/generate_email.js'
@@ -15,6 +16,8 @@ import {
 import session from '../models/SessionModel'
 import Payment from '../models/PaymentModel'
 import { AddUserSOA, LoginUserSOA } from '../services/soa_chat'
+import Review from '../models/ReviewModel'
+import { bookaRide } from './RideController'
 
 const registerDriver = asyncHandler(async (req, res) => {
   const { firstName, lastName, email, password, confirmpassword, phone } =
@@ -424,8 +427,13 @@ const getEarningDetails = async (req, res) => {
           },
         },
       }).lean()
+    console.log('payment.ride._id', payment.ride._id)
+    const rating = await Review.findOne({ ride: payment.ride._id })
+    const ride = await BookRide.findOne({ _id: payment.ride._id }).populate('promocode')
     await res.status(201).json({
       payment,
+      rating,
+      ride
     })
   } catch (error) {
     console.log('error', error)

@@ -1,7 +1,7 @@
 import PromoCode from "../models/PromoCodeModel";
 
 const createPromoCode = async (req, res) => {
-  const { title, startingdate, endingdate, promocode, noofusers, discount } =
+  const { title, startingdate, endingdate, promocode, noofusers, discount,admincommision } =
     req.body;
 
   console.log("req.bpdy", req.body);

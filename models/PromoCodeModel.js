@@ -25,6 +25,10 @@ const PromoCodeSchema = mongoose.Schema(
     noofusers: {
       type: Number
     },
+    admincommision: {
+      type: Number,
+      default: 0
+    },
     usersavailed: {
       type: Number,
       default: 0
