@@ -67,18 +67,22 @@ const editVehicle = async (req, res) => {
       VinNo,
       id
     } = req.body;
-    let licensePlate =
-      req.files &&
-      req.files.license_plate &&
-      req.files.license_plate[0] &&
-      req.files.license_plate[0].path;
-    let insurancedoc =
-      req.files &&
-      req.files.doc_schedule &&
-      req.files.doc_schedule[0] &&
-      req.files.doc_schedule[0].path;
+    let _doc_schedule = [];
+    const insurancedoc = [];
+    _doc_schedule = req.files.doc_schedule;
+    if (!Array.isArray(_doc_schedule)) throw new Error("Docs Required");
+    _doc_schedule.forEach((doc) => insurancedoc.push(doc.path));
 
+    let _licensePlate = [];
+     const licensePlate = [];
+    _licensePlate = req.files.license_plate;
+    if (!Array.isArray(_licensePlate)) throw new Error("License Required");
+    _licensePlate.forEach((lic) => licensePlate.push(lic.path));
+
+    console.log('vehicletype',vehicletype)
+    console.log('id',id)
     const vehicle = await DriverVehicle.findById(id);
+    console.log('vehicle',vehicle)
 
     vehicle.vehicletype = vehicletype ? vehicletype : vehicle.vehicletype;
     vehicle.brandname = brandname ? brandname : vehicle.brandname;
