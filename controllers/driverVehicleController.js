@@ -13,14 +13,14 @@ const createDriverVehicle = async (req, res) => {
     let _doc_schedule = [];
     const insurancedoc = [];
     _doc_schedule = req.files.doc_schedule;
-    if (!Array.isArray(_doc_schedule)) throw new Error("Docs Required");
-    _doc_schedule.forEach((doc) => insurancedoc.push(doc.path));
+    // if (!Array.isArray(_doc_schedule)) throw new Error("Docs Required");
+    _doc_schedule && _doc_schedule.forEach((doc) => insurancedoc.push(doc.path));
 
     let _licensePlate = [];
      const licensePlate = [];
     _licensePlate = req.files.license_plate;
-    if (!Array.isArray(_licensePlate)) throw new Error("License Required");
-    _licensePlate.forEach((lic) => licensePlate.push(lic.path));
+    // if (!Array.isArray(_licensePlate)) throw new Error("License Required");
+    _licensePlate &&_licensePlate.forEach((lic) => licensePlate.push(lic.path));
 
   try {
     const vehicleCreated = await new DriverVehicle({
@@ -70,15 +70,15 @@ const editVehicle = async (req, res) => {
     let _doc_schedule = [];
     const insurancedoc = [];
     _doc_schedule = req.files.doc_schedule;
-    if (!Array.isArray(_doc_schedule)) throw new Error("Docs Required");
-    _doc_schedule.forEach((doc) => insurancedoc.push(doc.path));
+    // if (!Array.isArray(_doc_schedule)) throw new Error("Docs Required");
+    _doc_schedule && _doc_schedule.forEach((doc) => insurancedoc.push(doc.path));
 
     let _licensePlate = [];
      const licensePlate = [];
     _licensePlate = req.files.license_plate;
-    if (!Array.isArray(_licensePlate)) throw new Error("License Required");
-    _licensePlate.forEach((lic) => licensePlate.push(lic.path));
-
+    // if (!Array.isArray(_licensePlate)) throw new Error("License Required");
+    _licensePlate &&_licensePlate.forEach((lic) => licensePlate.push(lic.path));
+console.log('insurancedoc',insurancedoc)
     console.log('vehicletype',vehicletype)
     console.log('id',id)
     const vehicle = await DriverVehicle.findById(id);
@@ -91,8 +91,8 @@ const editVehicle = async (req, res) => {
     vehicle.licenseNo = licenseNo ? licenseNo : vehicle.licenseNo;
     vehicle.VinNo = VinNo ? VinNo : vehicle.VinNo;
 
-    vehicle.licensePlate = licensePlate ? licensePlate : vehicle.licensePlate;
-    vehicle.insurancedoc = insurancedoc ? insurancedoc : vehicle.insurancedoc;
+    vehicle.licensePlate = licensePlate.length>0  ? licensePlate : vehicle.licensePlate;
+    vehicle.insurancedoc = insurancedoc.length>0 ? insurancedoc : vehicle.insurancedoc;
 
     await vehicle.save();
     await res.status(201).json({
