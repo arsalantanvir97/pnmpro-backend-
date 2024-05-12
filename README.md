@@ -20,7 +20,7 @@ Welcome to the backend repository for PNMPro, a platform similar to Uber, connec
   - Integrated wallet system for users to pay for rides and top up their wallet with cash.
 - **Driver Availability Management**:
   - Drivers can mark themselves as available or unavailable for rides.
-  - **Music Playlist Sharing**:
+- **Music Playlist Sharing**:
   - Drivers can provide a list of available songs stored in their vehicle's database, which users can request to listen to during the ride.
 
 
