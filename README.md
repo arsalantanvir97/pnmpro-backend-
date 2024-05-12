@@ -21,7 +21,7 @@ Welcome to the backend repository for PNMPro, a platform similar to Uber, connec
 - **Driver Availability Management**:
   - Drivers can mark themselves as available or unavailable for rides.
 - **Music Playlist Sharing**:
-  - Drivers can provide a list of available songs stored in their vehicle's database, which users can request to listen to during the ride.
+  - Each Driver have a list of available songs unique to them, which users can request to listen to during the ride.
 
 
 ## Technologies Used
@@ -44,24 +44,10 @@ Welcome to the backend repository for PNMPro, a platform similar to Uber, connec
 
 2. **Install dependencies:**
     ```bash
-    cd pnmpro-backend
     npm install
     ```
 
-3. **Set up environment variables:**
-
-    Create a `.env` file in the root directory and add the following:
-
-    ```
-    PORT=3000
-    MONGODB_URI=<your_mongodb_uri>
-    JWT_SECRET=<your_jwt_secret>
-    PUSH_NOTIFICATION_SERVICE=<your_push_notification_service_credentials>
-    ```
-
-    Make sure to replace `<your_mongodb_uri>`, `<your_jwt_secret>`, and `<your_push_notification_service_credentials>` with your actual MongoDB URI, JWT secret, and push notification service credentials respectively.
-
-4. **Run the server:**
+3. **Run the server:**
     ```bash
     npm start
     ```
